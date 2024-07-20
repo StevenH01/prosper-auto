@@ -1,5 +1,5 @@
 import React from "react";
-import CarAnimation from "./components/CarAnimation";
+import CarAnimation from "./components/loading/CarAnimation";
 
 export default function Home() {
   return (
