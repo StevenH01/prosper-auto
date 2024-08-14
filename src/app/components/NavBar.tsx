@@ -14,7 +14,7 @@ export const NavBar = () => {
       <div className='flex justify-between'>
         {/* Left side */}
         <h2 className='flex'>
-          <a>
+          <a href='/'>
             Prosper AutoWerks
           </a>
         </h2>
@@ -24,7 +24,9 @@ export const NavBar = () => {
             Pricing
           </div>
           <div className='mr-4'>
-            Login
+            <a href="/login">
+              Login
+            </a>
           </div>
           <div className='mr-4'>
             Book Now
