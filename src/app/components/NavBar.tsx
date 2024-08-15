@@ -15,7 +15,7 @@ export const NavBar = () => {
         {/* Left side */}
         <h2 className='flex'>
           <a href='/'>
-            Prosper AutoWerks
+            <img src="/logo-clear-bg.PNG" alt="logo" />
           </a>
         </h2>
         {/* Right side */}
