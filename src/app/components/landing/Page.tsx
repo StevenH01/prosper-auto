@@ -1,8 +1,8 @@
-import React from 'react';
+import React from "react";
 
 const LandingPage = () => {
   return (
-    <div>
+    <div className="p-10">
       Temp
       {/* Have a stock image and text above to show a car they have odne as well as showing their name */}
       {/* About Us section */}
@@ -10,6 +10,6 @@ const LandingPage = () => {
       {/* Book Now button below to change page for booking appointments */}
     </div>
   );
-}
+};
 
 export default LandingPage;
