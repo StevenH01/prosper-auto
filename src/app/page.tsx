@@ -1,5 +1,4 @@
 import React from "react";
-import CarAnimation from "./components/loading/CarAnimation";
 import { NavBar } from "./components/NavBar";
 import LandingPage from "./components/landing/Page";
 
