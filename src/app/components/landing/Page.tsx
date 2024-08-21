@@ -1,7 +1,12 @@
+"use client"
+
 import React from "react";
 import Image from "next/image";
+import Location_Map from '../map/Location_Map';
 
-const LandingPage = () => {
+const LandingPage: React.FC = () => {
+  const address = "6611 Orange Ave suite d, Sacramento, CA"
+
   return (
     <div className="">
       <div className="relative h-[800px] w-full overflow-hidden">
@@ -37,6 +42,10 @@ const LandingPage = () => {
       {/* About Us section */}
       {/* All services they provide, each having its own card, cards contain image and text */}
       {/* Book Now button below to change page for booking appointments */}
+      <div>
+        <h2></h2>
+        <Location_Map address={address} />
+      </div>
     </div>
   );
 };
