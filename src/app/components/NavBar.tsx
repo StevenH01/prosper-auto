@@ -15,7 +15,7 @@ const NavLink: React.FC<NavLinkProps> = ({ href, children }) => (
 
 export const NavBar: React.FC = () => {
   return (
-    <nav className="flex justify-between items-center py-5 px-10 border-b-2 border-blue-500">
+    <nav className="flex justify-between items-center py-5 px-10 border-b-2 border-blue-800">
       <Link href="/" className="flex-shrink-0">
         <Image
           src="/logo-clear-bg.png"
@@ -32,7 +32,7 @@ export const NavBar: React.FC = () => {
         <NavLink href="/about">About</NavLink>
         <Link
           href="/book-now"
-          className="ml-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
+          className="ml-4 px-4 py-2 bg-blue-800 text-white rounded hover:bg-blue-900 transition-colors"
         >
           Book Now
         </Link>
