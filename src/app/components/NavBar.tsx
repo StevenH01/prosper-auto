@@ -1,6 +1,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { GiCarWheel } from "react-icons/gi";
 
 interface NavLinkProps {
   href: string;
@@ -36,6 +37,7 @@ export const NavBar: React.FC = () => {
         >
           Book Now
         </Link>
+        <NavLink href="/login"><GiCarWheel /></NavLink>
       </div>
     </nav>
   );

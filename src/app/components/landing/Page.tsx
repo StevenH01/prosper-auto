@@ -3,6 +3,8 @@
 import React from "react";
 import Image from "next/image";
 import Location_Map from '../map/Location_Map';
+import Services from "../services/Services";
+import About from "../../about/About";
 
 const LandingPage: React.FC = () => {
   const address = "6611 Orange Ave suite d, Sacramento, CA"
@@ -38,12 +40,9 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       <div className="h-[500px]" />
-      {/* Have a stock image and text above to show a car they have odne as well as showing their name */}
-      {/* About Us section */}
-      {/* All services they provide, each having its own card, cards contain image and text */}
-      {/* Book Now button below to change page for booking appointments */}
+      <Services />
+      <About />
       <div>
-        <h2></h2>
         <Location_Map address={address} />
       </div>
     </div>
