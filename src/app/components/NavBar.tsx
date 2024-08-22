@@ -19,7 +19,7 @@ export const NavBar: React.FC = () => {
     <nav className="flex justify-between items-center py-5 px-10 border-b-2 border-blue-800">
       <Link href="/" className="flex-shrink-0">
         <Image
-          src="/logo-clear-bg.png"
+          src="/prosper-logo-transparent.png"
           alt="prosper-auto-logo"
           width={200}
           height={100}
@@ -37,7 +37,9 @@ export const NavBar: React.FC = () => {
         >
           Book Now
         </Link>
-        <NavLink href="/login"><GiCarWheel /></NavLink>
+        <NavLink href="/login">
+          <GiCarWheel />
+        </NavLink>
       </div>
     </nav>
   );
