@@ -1,5 +1,4 @@
 import React from "react";
-import { Poppins } from "next/font/google";
 import { AnimatedText } from "./components/landing/AnimatedText";
 import { ImageGallery } from "./components/landing/ImageGallery";
 import { Heading } from "./components/landing/Heading";
@@ -13,13 +12,9 @@ import {
 import Link from "next/link";
 import { LocationMap } from "./components/map/LocationMap";
 import { HeroSection } from "./components/landing/HeroSection";
+import { UserReviewsGrid } from "./components/landing/UserReviewsGrids";
 
 const address = "6611 Orange Ave Suite D, Sacramento, CA";
-
-const poppins = Poppins({
-  weight: "800",
-  subsets: ["latin"],
-});
 
 export default function Home() {
   return (
@@ -57,8 +52,9 @@ export default function Home() {
       <div id="about" className="px-10 sm:px-20 py-10">
         <Heading text="About Us" />
       </div>
-      <div id="location" className="flex flex-row gap-4 px-10 sm:px-20 py-10">
-        <Heading text="Customer Reviews" />
+      <div id="location" className="flex flex-col gap-4 px-10 sm:px-20 py-10">
+        <Heading text="Customer-Trusted" />
+        <UserReviewsGrid />
       </div>
       <div id="location" className="gap-4 px-10 sm:px-20 py-10">
         <Heading text="Contact Info" />
