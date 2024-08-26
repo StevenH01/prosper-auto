@@ -12,6 +12,7 @@ import {
 } from "@radix-ui/react-icons";
 import Link from "next/link";
 import { LocationMap } from "./components/map/LocationMap";
+import { HeroSection } from "./components/landing/HeroSection";
 
 const address = "6611 Orange Ave Suite D, Sacramento, CA";
 
@@ -23,19 +24,7 @@ const poppins = Poppins({
 export default function Home() {
   return (
     <main>
-      <div id="hero" className="h-[80vh] bg-zinc-900 px-10 sm:px-20 py-10">
-        <div
-          className={`${poppins.className} text-7xl sm:text-8xl text-white sm:max-w-[70%] max-w-full uppercase mb-4`}
-        >
-          Protect Your Vehicle.
-        </div>
-        <div className="text-gray-200 text-xl">
-          Prosper Auto is the local tinting and wrapping expert you can trust
-        </div>
-        <button className="bg-white text-zinc-900 font-medium p-4 rounded mt-4">
-          Get Pricing Now
-        </button>
-      </div>
+      <HeroSection />
       <div id="animation" className="py-10">
         <AnimatedText text="Tint • Wrap • PPF • Ceramic Coating •" reverse />
         <AnimatedText text="Sacramento, CA • 38.497712° N 121.384244° W •" />
