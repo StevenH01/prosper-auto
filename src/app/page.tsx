@@ -1,6 +1,9 @@
 import React from "react";
 import { Poppins } from "next/font/google";
 import { AnimatedText } from "./components/landing/AnimatedText";
+import { ImageGallery } from "./components/landing/ImageGallery";
+import { Heading } from "./components/landing/Heading";
+import { OurServices } from "./components/landing/OurServices";
 
 const poppins = Poppins({
   weight: "800",
@@ -23,14 +26,26 @@ export default function Home() {
           Get Pricing Now
         </button>
       </div>
-      <div id="animation" className="h-[500px] py-10">
+      <div id="animation" className="py-10">
         <AnimatedText text="Tint • Wrap • PPF • Ceramic Coating •" reverse />
         <AnimatedText text="Sacramento, CA • 38.497712° N 121.384244° W •" />
       </div>
-      <div id="gallery" className="h-[500px]"></div>
-      <div id="services" className="h-[500px]"></div>
-      <div id="about" className="h-[500px]"></div>
-      <div id="location" className="h-[500px]"></div>
+      <div id="gallery" className="px-10 sm:px-20 py-10">
+        <ImageGallery />
+      </div>
+      <div
+        id="services"
+        className="flex flex-col px-10 sm:px-20 py-10 bg-zinc-900"
+      >
+        <Heading text="Our Services" isWhite />
+        <OurServices />
+      </div>
+      <div id="about" className="px-10 sm:px-20 py-10">
+        <Heading text="About Us" />
+      </div>
+      <div id="location" className="px-10 sm:px-20 py-10">
+        <Heading text="Contact Us" />
+      </div>
     </main>
   );
 }
