@@ -30,7 +30,6 @@ export const NavBar: React.FC = () => {
         />
       </Link>
       <div className="hidden sm:flex items-center">
-        <NavLink href="/">Home</NavLink>
         <NavLink href="/services">Services</NavLink>
         <NavLink href="/about">Contact</NavLink>
         <Link

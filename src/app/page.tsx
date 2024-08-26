@@ -36,6 +36,12 @@ export default function Home() {
       <div
         id="services"
         className="flex flex-col px-10 sm:px-20 py-10 bg-zinc-900"
+        style={{
+          backgroundImage: "url('/textures/waves.svg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+        }}
       >
         <Heading text="Our Services" isWhite />
         <OurServices />

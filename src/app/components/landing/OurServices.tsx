@@ -1,3 +1,10 @@
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({
+  weight: "600",
+  subsets: ["latin"],
+});
+
 const ServiceCard = ({
   title,
   description,
@@ -5,8 +12,10 @@ const ServiceCard = ({
   title: string;
   description: string;
 }) => (
-  <div className="bg-zinc-900 rounded-md border-slate-50">
-    <h3 className="text-xl text-zinc-200 font-semibold">{title}</h3>
+  <div className="p-5 bg-zinc-950 rounded-md border-slate-50">
+    <h3 className={`${poppins.className} text-xl text-zinc-200 uppercase mb-4`}>
+      {title}
+    </h3>
     <p className="text-zinc-300">{description}</p>
   </div>
 );
