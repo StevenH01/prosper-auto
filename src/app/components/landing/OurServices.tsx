@@ -13,7 +13,9 @@ const ServiceCard = ({
   description: string;
 }) => (
   <div className="p-5 bg-zinc-950 rounded-md border-slate-50">
-    <h3 className={`${poppins.className} text-xl text-zinc-200 uppercase mb-4`}>
+    <h3
+      className={`${poppins.className} font-bold text-xl text-zinc-200 uppercase mb-4`}
+    >
       {title}
     </h3>
     <p className="text-zinc-300">{description}</p>

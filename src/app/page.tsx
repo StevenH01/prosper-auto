@@ -6,6 +6,9 @@ import { Heading } from "./components/landing/Heading";
 import { OurServices } from "./components/landing/OurServices";
 import { InstagramLogoIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
+import { LocationMap } from "./components/map/LocationMap";
+
+const address = "6611 Orange Ave Suite D, Sacramento, CA";
 
 const poppins = Poppins({
   weight: "800",
@@ -60,8 +63,12 @@ export default function Home() {
       <div id="about" className="px-10 sm:px-20 py-10">
         <Heading text="About Us" />
       </div>
-      <div id="location" className="px-10 sm:px-20 py-10">
+      <div id="location" className="flex flex-row gap-4 px-10 sm:px-20 py-10">
+        <Heading text="Ask Our Customers" />
+      </div>
+      <div id="location" className="flex flex-row gap-4 px-10 sm:px-20 py-10">
         <Heading text="Contact Us" />
+        <LocationMap address={address} />
       </div>
     </main>
   );
