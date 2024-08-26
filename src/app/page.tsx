@@ -4,6 +4,8 @@ import { AnimatedText } from "./components/landing/AnimatedText";
 import { ImageGallery } from "./components/landing/ImageGallery";
 import { Heading } from "./components/landing/Heading";
 import { OurServices } from "./components/landing/OurServices";
+import { InstagramLogoIcon } from "@radix-ui/react-icons";
+import Link from "next/link";
 
 const poppins = Poppins({
   weight: "800",
@@ -30,8 +32,17 @@ export default function Home() {
         <AnimatedText text="Tint • Wrap • PPF • Ceramic Coating •" reverse />
         <AnimatedText text="Sacramento, CA • 38.497712° N 121.384244° W •" />
       </div>
-      <div id="gallery" className="px-10 sm:px-20 py-10">
+      <div
+        id="gallery"
+        className="flex flex-col items-center gap-4 px-10 sm:px-20 py-10"
+      >
         <ImageGallery />
+        <Link href="https://www.instagram.com/prosperautowerks/">
+          <div className="flex flex-row gap-1 items-center">
+            <InstagramLogoIcon />
+            <div className="font-bold uppercase text-xs">@prosperautowerks</div>
+          </div>
+        </Link>
       </div>
       <div
         id="services"
