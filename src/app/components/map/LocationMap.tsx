@@ -7,8 +7,7 @@ import { getCoordinates, Coordinates } from "@/utils/gMaps/geocode";
 const containerStyle = {
   width: "100%",
   height: "300px",
-  maxWidth: "100%", // Set the max width to full to occupy half of the screen in flexbox
-  borderRadius: "15px",
+  maxWidth: "100%",
   overflow: "hidden",
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
 };
@@ -38,37 +37,13 @@ export const LocationMap: React.FC<MapProps> = ({ address }) => {
   }
 
   return (
-    <div className="mb-12 p-8">
+    <div>
       <LoadScript
         googleMapsApiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || ""}
       >
-        <div className="flex flex-wrap">
-          <div className="w-full md:w-1/2 p-4">
-            <h2 className="text-2xl font-bold mb-4">
-              We are located off Stockton Boulevard and Orange Avenue!
-            </h2>
-            <p className="text-lg">
-              Come visit us at our store! We are located at{" "}
-              <a
-                href="https://www.google.com/maps/dir/?api=1&destination=6611+Orange+Ave+suite+d,+Sacramento,+CA+95823"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:text-blue-800"
-              >
-                6611 Orange Ave suite d, Sacramento, CA 95823
-              </a>
-            </p>
-          </div>
-          <div className="w-full md:w-1/2 p-4">
-            <GoogleMap
-              mapContainerStyle={containerStyle}
-              center={center}
-              zoom={15}
-            >
-              <Marker position={center} />
-            </GoogleMap>
-          </div>
-        </div>
+        <GoogleMap mapContainerStyle={containerStyle} center={center} zoom={15}>
+          <Marker position={center} />
+        </GoogleMap>
       </LoadScript>
     </div>
   );
