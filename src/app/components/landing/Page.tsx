@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import Location_Map from "../map/Location_Map";
+import { LocationMap } from "../map/LocationMap";
 import Services from "../services/Services";
 import About from "../../about/About";
 
@@ -43,7 +43,7 @@ const LandingPage: React.FC = () => {
       <Services />
       <About />
       <div>
-        <Location_Map address={address} />
+        <LocationMap address={address} />
       </div>
     </div>
   );
