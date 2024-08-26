@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
 import React from "react";
 import Image from "next/image";
-import Location_Map from '../map/Location_Map';
+import Location_Map from "../map/Location_Map";
 import Services from "../services/Services";
 import About from "../../about/About";
 
 const LandingPage: React.FC = () => {
-  const address = "6611 Orange Ave suite d, Sacramento, CA"
+  const address = "6611 Orange Ave suite d, Sacramento, CA";
 
   return (
     <div className="">
