@@ -34,11 +34,12 @@ export const HeroSection = () => {
         <p className="text-gray-200 text-lg sm:text-xl mb-2">
           Prosper Auto is the local tinting and wrapping expert you can trust.
         </p>
+        {/* Struggling to make it mobile friendly */}
         <div className="flex text-white">
-          <p className="text-red-600 mr-2">
-            3D
+          <p className="text-red-600 mr-2 font-bold text-lg">
+            3M
           </p>
-          <span>and</span>
+          <span className="mr-2">and</span>
             <img
               src="/ws.png"
               alt="windshieldskinlogo"
@@ -46,7 +47,7 @@ export const HeroSection = () => {
               width={250}
               className="mb-6"
             />
-          <p className="ml-2">certified</p>
+          <p className="">Certified</p>
         </div>
         <button className="bg-white text-zinc-900 font-medium px-6 py-3 rounded transition-colors duration-300 hover:bg-gray-200">
           Get Pricing Now
@@ -55,7 +56,7 @@ export const HeroSection = () => {
       <div
         className="absolute bottom-0 right-0 w-[100%] sm:w-[60%] h-full bg-contain bg-right-bottom bg-no-repeat will-change-transform"
         style={{
-          backgroundImage: "url('/cybertruck.png')",
+          backgroundImage: "url('/gt3.png')",
           transform: `translateY(${translateY}px)`,
         }}
       />

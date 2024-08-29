@@ -14,6 +14,7 @@ import { LocationMap } from "./components/map/LocationMap";
 import { HeroSection } from "./components/landing/HeroSection";
 import { UserReviewsGrid } from "./components/landing/UserReviewsGrids";
 import { Poppins } from "next/font/google";
+import About from "./about/About";
 
 const address = "6611 Orange Ave Suite D, Sacramento, CA";
 
@@ -58,9 +59,10 @@ export default function Home() {
       </div>
       <div id="about" className="px-10 sm:px-20 py-10">
         <Heading text="About Us" />
+        <About />
       </div>
       <div id="location" className="flex flex-col gap-4 px-10 sm:px-20 py-10">
-        <Heading text="Customer-Trusted" />
+        <Heading text="Customer-Trusted"/>
         <UserReviewsGrid />
       </div>
       <div id="location" className="gap-4 px-10 sm:px-20 py-10">
