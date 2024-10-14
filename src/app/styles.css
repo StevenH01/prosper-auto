@@ -1,0 +1,17 @@
+.modal-scrollbar::-webkit-scrollbar {
+  width: 12px;
+}
+
+.modal-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #888;
+  border-radius: 6px;
+  border: 3px solid #f1f1f1;
+}
+
+.modal-scrollbar::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
