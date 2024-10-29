@@ -1,6 +1,7 @@
 "use client";
 import { Poppins } from "next/font/google";
 import { useEffect, useState, useCallback } from "react";
+import CustomModal from "../CustomModal";
 
 const poppins = Poppins({
   weight: "800",
@@ -9,6 +10,9 @@ const poppins = Poppins({
 
 export const HeroSection = () => {
   const [translateY, setTranslateY] = useState(0);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State to control the modal
+  const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
   const handleScroll = useCallback(() => {
     const scrollPosition = window.scrollY;
@@ -49,7 +53,9 @@ export const HeroSection = () => {
             />
           <p className="">Certified</p>
         </div>
-        <button className="bg-white text-zinc-900 font-medium px-6 py-3 rounded transition-colors duration-300 hover:bg-gray-200">
+        <button 
+          onClick={openModal}
+          className="bg-white text-zinc-900 font-medium px-6 py-3 rounded transition-colors duration-300 hover:bg-gray-200">
           Get Pricing Now
         </button>
       </div>
@@ -60,6 +66,9 @@ export const HeroSection = () => {
           transform: `translateY(${translateY}px)`,
         }}
       />
+      {isModalOpen && (
+        <CustomModal closeModal={closeModal} />
+      )}
     </div>
   );
 };

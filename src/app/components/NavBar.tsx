@@ -39,7 +39,7 @@ export const NavBar: React.FC = () => {
           />
         </Link>
         <div className="hidden sm:flex items-center">
-          <NavLink href="/#services">Services</NavLink>
+          <NavLink href="#services">Services</NavLink>
           <NavLink href="#location">Contact</NavLink>
           {/* Trigger to open the modal */}
           <button
