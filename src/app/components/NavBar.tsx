@@ -30,8 +30,8 @@ export const NavBar: React.FC = () => {
         />
       </Link>
       <div className="hidden sm:flex items-center">
-        <NavLink href="/services">Services</NavLink>
-        <NavLink href="/about">Contact</NavLink>
+        <NavLink href="#services">Services</NavLink>
+        <NavLink href="#contact">Contact</NavLink>
         <Link
           href="/book-now"
           className="ml-4 px-4 py-2 bg-white text-black rounded"

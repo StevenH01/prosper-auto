@@ -65,7 +65,7 @@ export default function Home() {
         <Heading text="Customer-Trusted"/>
         <UserReviewsGrid />
       </div>
-      <div id="location" className="gap-4 px-10 sm:px-20 py-10">
+      <div id="contact" className="gap-4 px-10 sm:px-20 py-10">
         <Heading text="Contact Info" />
         <div className="flex flex-col sm:flex-row gap-1">
           <div className="bg-zinc-900 w-full sm:w-1/2 p-5 flex flex-col gap-2 text-white font-bold uppercase">
