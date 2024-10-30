@@ -62,15 +62,35 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
     };
 
     try {
+      // Send the booking data to the backend
       const res = await axios.post('/api/bookEvent', eventDetails);
       if (res.status === 200) {
         alert('Booking confirmed!');
+
+        // Combine details for the service with additional info
+        const combinedServiceDetails = `
+          Vehicle Year: ${vehicleYear},
+          Make: ${vehicleMake},
+          Model: ${vehicleModel},
+          Additional Info: ${additionalInfo}
+        `;
+
+        // Send notifications (SMS to owner and email to client)
+        await axios.post('/api/sendNotifications', {
+          clientEmail: email,
+          clientName: `${firstName} ${lastName}`,
+          clientPhone: phoneNumber,
+          serviceDetails: combinedServiceDetails,
+          ownerEmail: 'steven09ho@gmail.com', // Replace with the actual owner email
+          ownerPhone: '+19167098025', // Replace with the owner's phone number
+        });
       }
     } catch (error) {
       console.error('Error booking the event:', error);
       alert('Failed to confirm booking');
     }
   };
+
 
   return (
     <Dialog.Root open onOpenChange={closeModal}>

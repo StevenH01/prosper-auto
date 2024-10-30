@@ -43,7 +43,7 @@ export const HeroSection = () => {
           <p className="text-red-600 mr-2 font-bold text-lg">
             3M
           </p>
-          <span className="mr-2">and</span>
+          <span className="mr-2">&</span>
             <img
               src="/ws.png"
               alt="windshieldskinlogo"
