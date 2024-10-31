@@ -2,11 +2,15 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 import axios from 'axios';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 interface TimeSlot {
   start: string;
   end: string;
 }
+
+type ServiceKey = 'ppf' | 'windowTint' | 'ceramicCoating' | 'vinylWrap';
 
 interface CustomModalProps {
   closeModal: () => void;
@@ -32,7 +36,24 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
     vehicleYear: '',
     vehicleMake: '',
     vehicleModel: '',
+    services: ''
   });
+
+  // State to track selected services
+  const [services, setServices] = useState({
+    ppf: false,
+    windowTint: false,
+    ceramicCoating: false,
+    vinylWrap: false,
+  });
+
+  // Handle checkbox change with specific type
+  const handleServiceChange = (service: ServiceKey) => {
+    setServices((prev) => ({
+      ...prev,
+      [service]: !prev[service],
+    }));
+  };
 
   // Validation function
   const validateForm = () => {
@@ -44,6 +65,9 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
       vehicleYear: vehicleYear ? '' : 'Vehicle year is required.',
       vehicleMake: vehicleMake ? '' : 'Vehicle make is required.',
       vehicleModel: vehicleModel ? '' : 'Vehicle model is required.',
+      services: Object.values(services).some((selected) => selected)
+        ? ''
+        : 'Please select one of the following services.'
     };
     setErrors(newErrors);
 
@@ -61,36 +85,32 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
       end: { dateTime: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString() },
     };
 
+    const selectedServices = Object.entries(services)
+    .filter(([_, isSelected]) => isSelected)
+    .map(([service]) => service.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()))
+    .join(', ');
+
     try {
       // Send the booking data to the backend
       const res = await axios.post('/api/bookEvent', eventDetails);
       if (res.status === 200) {
-        alert('Booking confirmed!');
-
-        // Combine details for the service with additional info
-        const combinedServiceDetails = `
-          Vehicle Year: ${vehicleYear},
-          Make: ${vehicleMake},
-          Model: ${vehicleModel},
-          Additional Info: ${additionalInfo}
-        `;
+        toast.success('Thank you! Someone will reach out to you as soon as possible with a quote.');
 
         // Send notifications (SMS to owner and email to client)
         await axios.post('/api/sendNotifications', {
           clientEmail: email,
           clientName: `${firstName} ${lastName}`,
           clientPhone: phoneNumber,
-          serviceDetails: combinedServiceDetails,
+          serviceDetails: `Vehicle Year: ${vehicleYear} \nMake: ${vehicleMake} \nModel: ${vehicleModel} \nAdditional Info: ${additionalInfo} \nSelected Services: ${selectedServices}`,
           ownerEmail: 'steven09ho@gmail.com', // Replace with the actual owner email
           ownerPhone: '+19167098025', // Replace with the owner's phone number
         });
       }
     } catch (error) {
       console.error('Error booking the event:', error);
-      alert('Failed to confirm booking');
+      toast.error('Failed to confirm booking. Please try again later.');
     }
   };
-
 
   return (
     <Dialog.Root open onOpenChange={closeModal}>
@@ -190,6 +210,48 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
             </div>
           </div>
 
+          {/* Services Section */}
+          <h3 className="text-lg font-semibold mt-6">Step 3: Select Services</h3>
+          <div className="grid grid-cols-2 gap-4 mt-4">
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="ppf"
+                checked={services.ppf}
+                onChange={() => handleServiceChange("ppf")}
+              />
+              <label htmlFor="ppf" className="font-semibold">Paint Protection Film</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="window-tint"
+                checked={services.windowTint}
+                onChange={() => handleServiceChange("windowTint")}
+              />
+              <label htmlFor="window-tint" className="font-semibold">Window Tint</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="ceramic-coating"
+                checked={services.ceramicCoating}
+                onChange={() => handleServiceChange("ceramicCoating")}
+              />
+              <label htmlFor="ceramic-coating" className="font-semibold">Ceramic Coating</label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="vinyl-wrap"
+                checked={services.vinylWrap}
+                onChange={() => handleServiceChange("vinylWrap")}
+              />
+              <label htmlFor="vinyl-wrap" className="font-semibold">Vehicle Vinyl Wrap</label>
+            </div>
+          </div>
+          {errors.services && <p className="text-red-600 text-sm mt-1">{errors.services}</p>}
+
           {/* Additional Information */}
           <div className="mt-6">
             <label className="font-semibold">Additional Information</label>
@@ -216,6 +278,14 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
           </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
+      {/* Toast Container to display notifications */}
+      <ToastContainer 
+        position="top-center" // Change position to top-center
+        autoClose={5000} 
+        hideProgressBar={false} 
+        closeOnClick 
+        pauseOnHover 
+      />
     </Dialog.Root>
   );
 };

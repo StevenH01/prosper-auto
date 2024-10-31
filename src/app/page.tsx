@@ -66,7 +66,7 @@ export default function Home() {
         <UserReviewsGrid />
       </div>
       <div id="contact" className="gap-4 px-10 sm:px-20 py-10">
-        <Heading text="Contact Info" />
+        <Heading text="Contanct Us" />
         <div className="flex flex-col sm:flex-row gap-1">
           <div className="bg-zinc-900 w-full sm:w-1/2 p-5 flex flex-col gap-2 text-white font-bold uppercase">
             <div className="flex flex-row gap-2 items-center">
@@ -90,6 +90,11 @@ export default function Home() {
               <EnvelopeClosedIcon />
               <a href="mailto:prosperauto@gmail.com" className="hover:underline">
                 prosperauto@gmail.com
+              </a>
+            </div>
+            <div>
+              <a href="https://www.google.com/search?q=prosper+autowerks&rlz=1C1UEAD_enUS1045US1045&oq=pr&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MhAIARAuGMcBGLEDGNEDGIAEMgYIAhBFGEAyBggDEEUYOTIGCAQQRRg8MgYIBRBFGDwyBggGEEUYPDIGCAcQRRg80gEIMTk1M2owajeoAgCwAgA&sourceid=chrome&ie=UTF-8#lrd=0x809ac5ea33ed8919:0x2d9030e20a6fa31c,1,,,,">
+                Write us a Review!
               </a>
             </div>
           </div>

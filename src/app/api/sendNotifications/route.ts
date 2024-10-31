@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       from: process.env.EMAIL_USERNAME,
       to: clientEmail,
       subject: "Booking Confirmation",
-      text: `Hello ${clientName},\n\nYour booking is confirmed!\n\nDetails:\n${serviceDetails}\n\nThank you!`,
+      text: `Hello ${clientName},\n\nYour booking is confirmed!\n \n${serviceDetails}\n\nThank you!`,
     };
     await transporter.sendMail(clientMailOptions);
 
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       from: process.env.EMAIL_USERNAME,
       to: process.env.OWNER_PHONE_SMS_EMAIL, // Replace with your carrier's email-to-SMS gateway
       subject: "", // No subject for SMS
-      text: `New booking from ${clientName}.\nPhone: ${clientPhone}\nDetails: ${serviceDetails}`,
+      text: `New booking from ${clientName}.\nPhone: ${clientPhone}\n ${serviceDetails}`,
     };
     await transporter.sendMail(smsMailOptions);
 
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
       from: process.env.EMAIL_USERNAME,
       to: process.env.OWNER_EMAIL, // Owner's actual email address
       subject: "New Job Inquiry - Booking Details",
-      text: `New booking received:\n\nClient Name: ${clientName}\nPhone: ${clientPhone}\nEmail: ${clientEmail}\nDetails:\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
+      text: `New booking received:\n\nClient Name: ${clientName}\nPhone: ${clientPhone}\nEmail: ${clientEmail}\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
     };
     await transporter.sendMail(ownerMailOptions);
 
