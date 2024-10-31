@@ -105,6 +105,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
           ownerEmail: 'steven09ho@gmail.com', // Replace with the actual owner email
           ownerPhone: '+19167098025', // Replace with the owner's phone number
         });
+        closeModal();
       }
     } catch (error) {
       console.error('Error booking the event:', error);
