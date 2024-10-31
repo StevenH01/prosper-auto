@@ -39,7 +39,6 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       <div className="h-[500px]" />
-      <Services />
       <About />
       <div>
         <LocationMap address={address} />

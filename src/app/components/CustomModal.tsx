@@ -119,7 +119,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
         <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 z-40" />
 
         <Dialog.Content className="fixed top-1/2 left-1/2 max-h-[90vh] w-[90vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] xl:w-[30vw] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-2xl shadow-lg z-50 overflow-y-auto">
-          <Dialog.Title className="text-xl font-bold mb-4">Let's get started!</Dialog.Title>
+          <Dialog.Title className="text-xl font-bold mb-4">Let&apos;s get started!</Dialog.Title>
           <Dialog.Description className="mb-6 text-sm text-gray-600">
             Fill out the form below, or contact us directly at:
           </Dialog.Description>
