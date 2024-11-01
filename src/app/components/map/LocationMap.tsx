@@ -8,6 +8,7 @@ const containerStyle = {
   width: "100%",
   height: "300px",
   maxWidth: "100%",
+  borderRadius: "15px",
   overflow: "hidden",
   boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
 };

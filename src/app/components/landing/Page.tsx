@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import { LocationMap } from "../map/LocationMap";
-import Services from "../services/Services";
 import About from "../../about/About";
 
 const LandingPage: React.FC = () => {
@@ -40,7 +39,6 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
       <div className="h-[500px]" />
-      <Services />
       <About />
       <div>
         <LocationMap address={address} />

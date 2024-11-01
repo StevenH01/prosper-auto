@@ -2,14 +2,15 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers"; // Make sure to import cookies
 
 import { createClient } from "@/utils/supabase/server";
 
 export async function login(formData: FormData) {
-  const supabase = createClient();
+  const cookieStore = cookies(); // Get the cookie store
+  const supabase = createClient(cookieStore); // Pass it to createClient
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  // Type-casting here for convenience
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
@@ -26,10 +27,10 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
-  const supabase = createClient();
+  const cookieStore = cookies(); // Get the cookie store
+  const supabase = createClient(cookieStore); // Pass it to createClient
 
-  // type-casting here for convenience
-  // in practice, you should validate your inputs
+  // Type-casting here for convenience
   const data = {
     email: formData.get("email") as string,
     password: formData.get("password") as string,
