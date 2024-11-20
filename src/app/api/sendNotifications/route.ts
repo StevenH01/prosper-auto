@@ -49,7 +49,6 @@ export async function POST(req: Request) {
       text: `Hello ${clientName},\n\nYour booking is confirmed!\n\n${serviceDetails}\n\nThank you!`,
     };
     await transporter.sendMail(clientMailOptions);
-    console.log("Client confirmation email sent successfully");
 
     // 2. Send SMS to the owner via email-to-SMS gateway
     if (process.env.OWNER_PHONE_SMS_EMAIL) {
@@ -60,7 +59,6 @@ export async function POST(req: Request) {
         text: `New booking from ${clientName}.\nPhone: ${clientPhone}\n${serviceDetails}`,
       };
       await transporter.sendMail(smsMailOptions);
-      console.log("SMS notification sent successfully to the owner");
     } else {
       console.warn(
         "OWNER_PHONE_SMS_EMAIL is not defined, skipping SMS notification"
@@ -76,7 +74,6 @@ export async function POST(req: Request) {
         text: `New booking received:\n\nClient Name: ${clientName}\nPhone: ${clientPhone}\nEmail: ${clientEmail}\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
       };
       await transporter.sendMail(ownerMailOptions);
-      console.log("Owner notification email sent successfully");
     } else {
       console.warn(
         "OWNER_EMAIL is not defined, skipping owner email notification"

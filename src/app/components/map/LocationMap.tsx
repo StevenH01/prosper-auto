@@ -23,7 +23,6 @@ export const LocationMap: React.FC<MapProps> = ({ address }) => {
   useEffect(() => {
     const fetchCoordinates = async () => {
       try {
-        console.log("HERE");
         const coordinates = await getCoordinates(address);
         setCenter(coordinates);
       } catch (error) {
