@@ -18,7 +18,7 @@ const ServiceCard = ({
     <img
       src={imageSrc}
       alt={title}
-      className="rounded-full object-cover mb-4 shadow-lg w-full h-48" // Add Tailwind classes here
+      className="rounded-md object-cover mb-4 shadow-lg w-full h-48" // Add Tailwind classes here
       height={50}
       width={50}
     />
@@ -49,7 +49,7 @@ export const OurServices = () => {
       title: "Paint Protection Film",
       description:
         "Invisible armor for your precious ride! Our cutting-edge paint protection film shields against road debris, stone chips, and environmental hazards. Keep your car looking showroom-fresh for years to come!",
-      imageSrc: "/gallery/image2.jpeg"
+      imageSrc: "./ppf_img.jpg"
       },
     {
       title: "Ceramic Coating",
