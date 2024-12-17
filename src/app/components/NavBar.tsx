@@ -3,7 +3,9 @@ import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { HamburgerMenuIcon } from "@radix-ui/react-icons";
-import CustomModal from './CustomModal'; // Import the modal
+import CustomModal from './CustomModal';
+import { PiSteeringWheel } from "react-icons/pi";
+import LoginPage from "../login/page";
 
 interface NavLinkProps {
   href: string;
@@ -48,10 +50,16 @@ export const NavBar: React.FC = () => {
           >
             Book Now
           </button>
+          
+          <Link href="/login" className="flex ml-4 px-4 py-2">
+            <PiSteeringWheel className="text-white cursor-pointer" size={24} color="white" />
+          </Link>
+       
         </div>
         <div className="flex sm:hidden">
           <HamburgerMenuIcon color="white" />
         </div>
+        
       </nav>
 
       {/* Modal - Opens based on the state */}

@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { login, signup } from "./action";
@@ -18,13 +17,33 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
     });
+    
+    if (error) throw error;
 
-    if (error) {
-      console.error("Error during Google login:", error);
-      setError(error.message || "An unexpected error occurred.");
-    } else {
-      // Handle successful login, if needed
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+      if (profileError) throw profileError;
+
+      const userRole = profile?.role || 'user';
+      console.log('User Role: ', userRole);
+
+      localStorage.setItem('userRole', userRole);
     }
+    // if (error) {
+    //   console.error("Error during Google login:", error);
+    //   setError(error.message || "An unexpected error occurred.");
+    // } else {
+    //   // Handle successful login, if needed
+    // }
   } catch (error) {
     // Handle any unexpected errors during the process
     console.error("Unexpected error:", error);
@@ -34,9 +53,6 @@ export default function LoginPage() {
 
   return (
     <div>
-      <div>
-        <a href="/">Prosper AutoWerks</a>
-      </div>
       <form className="grid justify-center items-center">
         <div className="flex justify-center p-4">
           <button
