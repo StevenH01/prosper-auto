@@ -77,33 +77,40 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
 
   const handleBooking = async () => {
     if (!validateForm()) return;
-
+  
     const eventDetails = {
       summary: 'Service Booking',
       description: `Booking for a service by ${firstName} ${lastName}`,
       start: { dateTime: new Date().toISOString() },
       end: { dateTime: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString() },
     };
-
+  
     const selectedServices = Object.entries(services)
-    .filter(([_, isSelected]) => isSelected)
-    .map(([service]) => service.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()))
-    .join(', ');
-
+      .filter(([_, isSelected]) => isSelected)
+      .map(([service]) => service.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()))
+      .join(', ');
+  
+    const serviceDetails = `
+      Vehicle Year: ${vehicleYear}
+      Vehicle Make: ${vehicleMake}
+      Vehicle Model: ${vehicleModel}
+      Selected Services: ${selectedServices}
+      Additional Info: ${additionalInfo}
+    `.trim();
+  
     try {
-      // Send the booking data to the backend
       const res = await axios.post('/api/bookEvent', eventDetails);
       if (res.status === 200) {
         toast.success('Thank you! Someone will reach out to you as soon as possible with a quote.');
-
+  
         // Send notifications (SMS to owner and email to client)
         await axios.post('/api/sendNotifications', {
           clientEmail: email,
           clientName: `${firstName} ${lastName}`,
           clientPhone: phoneNumber,
-          serviceDetails: `Vehicle Year: ${vehicleYear} \nMake: ${vehicleMake} \nModel: ${vehicleModel} \nAdditional Info: ${additionalInfo} \nSelected Services: ${selectedServices}`,
-          ownerEmail: 'steven09ho@gmail.com', // Replace with the actual owner email
-          ownerPhone: '+19167098025', // Replace with the owner's phone number
+          serviceDetails, // Pass the updated serviceDetails
+          ownerEmail: 'steven09ho@gmail.com',
+          ownerPhone: '+19167098025',
         });
         closeModal();
       }
@@ -111,7 +118,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
       console.error('Error booking the event:', error);
       toast.error('Failed to confirm booking. Please try again later.');
     }
-  };
+  };  
 
   return (
     <Dialog.Root open onOpenChange={closeModal}>

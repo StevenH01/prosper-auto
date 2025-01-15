@@ -52,17 +52,46 @@ export async function POST(req: Request) {
 
     // 2. Send SMS to the owner via email-to-SMS gateway
     if (process.env.OWNER_PHONE_SMS_EMAIL) {
+      const serviceAbbreviations: Record<string, string> = {
+        "Paint Protection Film": "PPF",
+        "Window Tint": "WT",
+        "Ceramic Coating": "CC",
+        "Vehicle Vinyl Wrap": "VVW",
+      };
+
+      // Extract vehicle details
+      const year = serviceDetails.match(/Vehicle Year: (.+)/)?.[1]?.trim() || "N/A";
+      const make = serviceDetails.match(/Vehicle Make: (.+)/)?.[1]?.trim() || "N/A";
+      const model = serviceDetails.match(/Vehicle Model: (.+)/)?.[1]?.trim() || "N/A";
+
+      // Extract additional info
+      const additionalInfo = serviceDetails.match(/Additional Info: (.+)/)?.[1]?.trim() || "None";
+
+      // Extract and abbreviate selected services
+      const servicesLine = serviceDetails.match(/Selected Services: (.+)/)?.[1];
+      const abbreviatedServices = servicesLine
+        ? servicesLine
+            .split(", ")
+            .map((service: string) => serviceAbbreviations[service.trim()] || service)
+            .join(", ")
+        : "None";
+
+      const smsMessage = `
+        New booking from ${clientName}.
+        Phone: ${clientPhone}
+        Vehicle: ${year} ${make} ${model}
+        Services: ${abbreviatedServices}
+        Additional Info: ${additionalInfo}
+      `.trim();
+
+      // SMS notification
       const smsMailOptions = {
         from: process.env.EMAIL_USERNAME,
         to: process.env.OWNER_PHONE_SMS_EMAIL,
         subject: "", // No subject for SMS
-        text: `New booking from ${clientName}.\nPhone: ${clientPhone}\n${serviceDetails}`,
+        text: smsMessage,
       };
       await transporter.sendMail(smsMailOptions);
-    } else {
-      console.warn(
-        "OWNER_PHONE_SMS_EMAIL is not defined, skipping SMS notification"
-      );
     }
 
     // 3. Send a full email to the owner with booking details
