@@ -79,9 +79,9 @@ export async function POST(req: Request) {
       const smsMessage = `
         New booking from ${clientName}.
         Phone: ${clientPhone}
-        Vehicle: ${year} ${make} ${model}
+        Car: ${year} ${make} ${model}
         Services: ${abbreviatedServices}
-        Additional Info: ${additionalInfo}
+        Other Info: ${additionalInfo}
       `.trim();
 
       // SMS notification

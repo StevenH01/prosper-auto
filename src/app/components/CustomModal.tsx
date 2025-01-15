@@ -109,8 +109,8 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
           clientName: `${firstName} ${lastName}`,
           clientPhone: phoneNumber,
           serviceDetails, // Pass the updated serviceDetails
-          ownerEmail: 'steven09ho@gmail.com',
-          ownerPhone: '+19167098025',
+          ownerEmail: 'prosperautowerks@gmail.com',
+          ownerPhone: '+19168387384',
         });
         closeModal();
       }
