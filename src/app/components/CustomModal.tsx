@@ -1,299 +1,259 @@
-import * as Dialog from '@radix-ui/react-dialog';
-import { Cross2Icon } from '@radix-ui/react-icons';
-import { useState } from 'react';
-import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+"use client";
 
-interface TimeSlot {
-  start: string;
-  end: string;
-}
+import * as Dialog from "@radix-ui/react-dialog";
+import { useEffect, useState } from "react";
+import { getVehicleMakes, getVehicleModels, getVehicleYears } from "@/lib/supabase";
+import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-type ServiceKey = 'ppf' | 'windowTint' | 'ceramicCoating' | 'vinylWrap';
+const CustomModal: React.FC<{ closeModal: () => void }> = ({ closeModal }) => {
+  // Form states
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [vehicleMake, setVehicleMake] = useState("");
+  const [vehicleModel, setVehicleModel] = useState("");
+  const [vehicleYear, setVehicleYear] = useState("");
+  const [additionalInfo, setAdditionalInfo] = useState("");
 
-interface CustomModalProps {
-  closeModal: () => void;
-}
-
-const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
-  // Form fields state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [vehicleYear, setVehicleYear] = useState('');
-  const [vehicleMake, setVehicleMake] = useState('');
-  const [vehicleModel, setVehicleModel] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState('');
-
-  // Error state for each field
-  const [errors, setErrors] = useState({
-    firstName: '',
-    lastName: '',
-    phoneNumber: '',
-    email: '',
-    vehicleYear: '',
-    vehicleMake: '',
-    vehicleModel: '',
-    services: ''
-  });
-
-  // State to track selected services
-  const [services, setServices] = useState({
+  // Job selection state
+  const [jobs, setJobs] = useState({
     ppf: false,
     windowTint: false,
     ceramicCoating: false,
     vinylWrap: false,
   });
 
-  // Handle checkbox change with specific type
-  const handleServiceChange = (service: ServiceKey) => {
-    setServices((prev) => ({
-      ...prev,
-      [service]: !prev[service],
-    }));
+  const [makes, setMakes] = useState<string[]>([]);
+  const [models, setModels] = useState<string[]>([]);
+  const [years, setYears] = useState<number[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const [loadingYears, setLoadingYears] = useState(false);
+
+  const [errors, setErrors] = useState({
+    fullName: "",
+    phoneNumber: "",
+    email: "",
+    vehicleMake: "",
+    vehicleModel: "",
+    vehicleYear: "",
+    jobs: "",
+  });
+
+  // Fetch vehicle makes on component mount
+  useEffect(() => {
+    async function fetchMakes() {
+      try {
+        const fetchedMakes = await getVehicleMakes();
+        setMakes(fetchedMakes);
+      } catch (error) {
+        console.error("Error fetching makes:", error);
+      }
+    }
+    fetchMakes();
+  }, []);
+
+  // Fetch models when a make is selected
+  useEffect(() => {
+    async function fetchModels() {
+      if (vehicleMake) {
+        setLoadingModels(true);
+        try {
+          const fetchedModels = await getVehicleModels(vehicleMake);
+          setModels(fetchedModels);
+          setVehicleModel(""); // Reset model selection when make changes
+        } catch (error) {
+          console.error("Error fetching models:", error);
+        }
+        setLoadingModels(false);
+      }
+    }
+    fetchModels();
+  }, [vehicleMake]);
+
+  // Fetch years when make & model are selected
+  useEffect(() => {
+    async function fetchYears() {
+      if (vehicleMake && vehicleModel) {
+        setLoadingYears(true);
+        try {
+          const fetchedYears = await getVehicleYears(vehicleMake, vehicleModel);
+          setYears(fetchedYears);
+          setVehicleYear(""); // Reset year selection when model changes
+        } catch (error) {
+          console.error("Error fetching years:", error);
+        }
+        setLoadingYears(false);
+      }
+    }
+    fetchYears();
+  }, [vehicleModel]);
+
+  // Handle job selection
+  const handleJobChange = (job: keyof typeof jobs) => {
+    setJobs((prev) => ({ ...prev, [job]: !prev[job] }));
   };
 
-  // Validation function
+  // Form validation
   const validateForm = () => {
     const newErrors = {
-      firstName: firstName ? '' : 'First name is required.',
-      lastName: lastName ? '' : 'Last name is required.',
-      phoneNumber: phoneNumber ? '' : 'Phone number is required.',
-      email: email ? '' : 'Email is required.',
-      vehicleYear: vehicleYear ? '' : 'Vehicle year is required.',
-      vehicleMake: vehicleMake ? '' : 'Vehicle make is required.',
-      vehicleModel: vehicleModel ? '' : 'Vehicle model is required.',
-      services: Object.values(services).some((selected) => selected)
-        ? ''
-        : 'Please select one of the following services.'
+      fullName: fullName ? "" : "Full name is required.",
+      phoneNumber: phoneNumber ? "" : "Phone number is required.",
+      email: email ? "" : "Email is required.",
+      vehicleMake: vehicleMake ? "" : "Vehicle make is required.",
+      vehicleModel: vehicleModel ? "" : "Vehicle model is required.",
+      vehicleYear: vehicleYear ? "" : "Vehicle year is required.",
+      jobs: Object.values(jobs).some((selected) => selected) ? "" : "Please select at least one job.",
     };
-    setErrors(newErrors);
 
-    // Check if there are any errors
-    return Object.values(newErrors).every((error) => error === '');
+    setErrors(newErrors);
+    return Object.values(newErrors).every((error) => error === "");
   };
 
+  // Handle form submission
   const handleBooking = async () => {
     if (!validateForm()) return;
-  
-    const eventDetails = {
-      summary: 'Service Booking',
-      description: `Booking for a service by ${firstName} ${lastName}`,
-      start: { dateTime: new Date().toISOString() },
-      end: { dateTime: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString() },
-    };
-  
-    const selectedServices = Object.entries(services)
+
+    const selectedJobs = Object.entries(jobs)
       .filter(([_, isSelected]) => isSelected)
-      .map(([service]) => service.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()))
-      .join(', ');
-  
+      .map(([job]) => {
+        switch (job) {
+          case "ppf":
+            return "Paint Protection Film";
+          case "windowTint":
+            return "Window Tint";
+          case "ceramicCoating":
+            return "Ceramic Coating";
+          case "vinylWrap":
+            return "Vehicle Vinyl Wrap";
+          default:
+            return job;
+        }
+      })
+      .join(", ");
+
     const serviceDetails = `
       Vehicle Year: ${vehicleYear}
       Vehicle Make: ${vehicleMake}
       Vehicle Model: ${vehicleModel}
-      Selected Services: ${selectedServices}
+      Selected Services: ${selectedJobs}
       Additional Info: ${additionalInfo}
     `.trim();
-  
+
     try {
-      const res = await axios.post('/api/bookEvent', eventDetails);
+      const res = await axios.post("/api/bookEvent", {
+        clientEmail: email,
+        clientName: fullName,
+        clientPhone: phoneNumber,
+        serviceDetails,
+      });
+
       if (res.status === 200) {
-        toast.success('Thank you! Someone will reach out to you as soon as possible with a quote.');
-  
-        // Send notifications (SMS to owner and email to client)
-        await axios.post('/api/sendNotifications', {
-          clientEmail: email,
-          clientName: `${firstName} ${lastName}`,
-          clientPhone: phoneNumber,
-          serviceDetails, // Pass the updated serviceDetails
-          ownerEmail: 'prosperautowerks@gmail.com',
-          ownerPhone: '+19168387384',
-        });
+        toast.success("Booking successful! We'll contact you soon.");
         closeModal();
       }
     } catch (error) {
-      console.error('Error booking the event:', error);
-      toast.error('Failed to confirm booking. Please try again later.');
+      console.error("Error booking the event:", error);
+      toast.error("Failed to confirm booking. Please try again later.");
     }
-  };  
+  };
 
   return (
     <Dialog.Root open onOpenChange={closeModal}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 z-40" />
-
         <Dialog.Content className="fixed top-1/2 left-1/2 max-h-[90vh] w-[90vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] xl:w-[30vw] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-2xl shadow-lg z-50 overflow-y-auto">
-          <Dialog.Title className="text-xl font-bold mb-4">Let&apos;s get started!</Dialog.Title>
-          <Dialog.Description className="mb-6 text-sm text-gray-600">
-            Fill out the form below, or contact us directly at:
-          </Dialog.Description>
+          <Dialog.Title className="text-xl font-bold mb4">Book a Service</Dialog.Title>
 
-          {/* Contact Details */}
-          <h3 className="text-lg font-semibold">Step 1: Contact Details</h3>
-          <div className="grid grid-cols-1 gap-4 mt-4">
-            <div className="flex flex-col">
-              <label className="font-semibold">First Name*</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your first name"
-              />
-              {errors.firstName && <p className="text-red-600 text-sm mt-1">{errors.firstName}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Last Name*</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your last name"
-              />
-              {errors.lastName && <p className="text-red-600 text-sm mt-1">{errors.lastName}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Mobile Phone Number*</label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your phone number"
-              />
-              {errors.phoneNumber && <p className="text-red-600 text-sm mt-1">{errors.phoneNumber}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Email Address*</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your email address"
-              />
-              {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
-            </div>
+          {/* Full Name */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Full Name*</label>
+            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} className="w-full border p-2 rounded-md" />
+            {errors.fullName && <p className="text-red-500 text-sm">{errors.fullName}</p>}
           </div>
 
-          {/* Vehicle Information */}
-          <h3 className="text-lg font-semibold mt-6">Step 2: Vehicle Information</h3>
-          <div className="grid grid-cols-1 gap-4 mt-4">
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Year*</label>
-              <input
-                type="text"
-                value={vehicleYear}
-                onChange={(e) => setVehicleYear(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., 2017"
-              />
-              {errors.vehicleYear && <p className="text-red-600 text-sm mt-1">{errors.vehicleYear}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Make*</label>
-              <input
-                type="text"
-                value={vehicleMake}
-                onChange={(e) => setVehicleMake(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., Tesla"
-              />
-              {errors.vehicleMake && <p className="text-red-600 text-sm mt-1">{errors.vehicleMake}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Model*</label>
-              <input
-                type="text"
-                value={vehicleModel}
-                onChange={(e) => setVehicleModel(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., Model S"
-              />
-              {errors.vehicleModel && <p className="text-red-600 text-sm mt-1">{errors.vehicleModel}</p>}
-            </div>
+          {/* Phone Number */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Phone Number*</label>
+            <input type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} className="w-full border p-2 rounded-md" />
+            {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber}</p>}
           </div>
 
-          {/* Services Section */}
-          <h3 className="text-lg font-semibold mt-6">Step 3: Select Services</h3>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="ppf"
-                checked={services.ppf}
-                onChange={() => handleServiceChange("ppf")}
-              />
-              <label htmlFor="ppf" className="font-semibold">Paint Protection Film</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="window-tint"
-                checked={services.windowTint}
-                onChange={() => handleServiceChange("windowTint")}
-              />
-              <label htmlFor="window-tint" className="font-semibold">Window Tint</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="ceramic-coating"
-                checked={services.ceramicCoating}
-                onChange={() => handleServiceChange("ceramicCoating")}
-              />
-              <label htmlFor="ceramic-coating" className="font-semibold">Ceramic Coating</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="vinyl-wrap"
-                checked={services.vinylWrap}
-                onChange={() => handleServiceChange("vinylWrap")}
-              />
-              <label htmlFor="vinyl-wrap" className="font-semibold">Vehicle Vinyl Wrap</label>
-            </div>
+          {/* Email */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Email*</label>
+            <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full border p-2 rounded-md" />
+            {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
           </div>
-          {errors.services && <p className="text-red-600 text-sm mt-1">{errors.services}</p>}
 
-          {/* Additional Information */}
-          <div className="mt-6">
-            <label className="font-semibold">Additional Information</label>
+          {/* Vehicle Make Dropdown */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Vehicle Make*</label>
+            <select value={vehicleMake} onChange={(e) => setVehicleMake(e.target.value)} className="w-full border p-2 rounded-md">
+              <option value="">Select Make</option>
+              {makes.map((make) => (
+                <option key={make} value={make}>{make}</option>
+              ))}
+            </select>
+            {errors.vehicleMake && <p className="text-red-500 text-sm">{errors.vehicleMake}</p>}
+          </div>
+
+          {/* Vehicle Model Dropdown */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Vehicle Model*</label>
+            <select value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} className="w-full border p-2 rounded-md" disabled={!vehicleMake}>
+              <option value="">Select Model</option>
+              {models.map((model) => (
+                <option key={model} value={model}>{model}</option>
+              ))}
+            </select>
+            {errors.vehicleModel && <p className="text-red-500 text-sm">{errors.vehicleModel}</p>}
+          </div>
+
+          {/* Vehicle Year Dropdown */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Vehicle Year*</label>
+            <select value={vehicleYear} onChange={(e) => setVehicleYear(e.target.value)} className="w-full border p-2 rounded-md" disabled={!vehicleModel}>
+              <option value="">Select Year</option>
+              {years.map((year) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            {errors.vehicleYear && <p className="text-red-500 text-sm">{errors.vehicleYear}</p>}
+          </div>
+
+          {/* Job Selection */}
+          <h3 className="text-lg font-semibold mt-6">Select Services*</h3>
+          <div className="grid grid-cols-2 gap-4 mt-2">
+            {Object.keys(jobs).map((jobKey) => (
+              <div key={jobKey} className="flex items-center space-x-2">
+                <input type="checkbox" id={jobKey} checked={jobs[jobKey as keyof typeof jobs]} onChange={() => handleJobChange(jobKey as keyof typeof jobs)} />
+                <label htmlFor={jobKey} className="font-semibold">{jobKey.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}</label>
+              </div>
+            ))}
+          </div>
+
+          {/* Additional Info */}
+          <div className="mt-4">
+            <label className="block text-sm font-medium">Additional Info</label>
             <textarea
               value={additionalInfo}
               onChange={(e) => setAdditionalInfo(e.target.value)}
-              className="border rounded px-3 py-2 w-full mt-2"
-              rows={4}
-              placeholder="Tell us more about your car's history or special requests"
-            ></textarea>
+              className="w-full border p-2 rounded-md"
+              rows={3}
+              placeholder="Enter any other concerns or requests..."
+            />
           </div>
 
-          <button
-            onClick={handleBooking}
-            className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-md w-full"
-          >
-            Send Service Request
+          {errors.jobs && <p className="text-red-500 text-sm mt-1">{errors.jobs}</p>}
+          <button onClick={handleBooking} className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-md w-full">
+            Book Now
           </button>
 
-          <Dialog.Close asChild>
-            <button onClick={closeModal} className="absolute top-2 right-2 text-black">
-              <Cross2Icon />
-            </button>
-          </Dialog.Close>
         </Dialog.Content>
       </Dialog.Portal>
-      {/* Toast Container to display notifications */}
-      <ToastContainer 
-        position="top-center" // Change position to top-center
-        autoClose={5000} 
-        hideProgressBar={false} 
-        closeOnClick 
-        pauseOnHover 
-      />
+      <ToastContainer position="top-center" autoClose={5000} hideProgressBar={false} closeOnClick pauseOnHover />
     </Dialog.Root>
   );
 };

@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import {
   getGoogleCalendar,
   getAvailableTimeSlots,
-} from "../../lib/googleCalender";
+} from "../../../lib/googleCalender";
 import { getServerSession } from "next-auth/next"; // Change this import
-import { authOptions } from "../../lib/auth"; // Ensure you have auth options defined
+import { authOptions } from "../../../lib/auth"; // Ensure you have auth options defined
 
 export async function GET(req: Request) {
   const session = await getServerSession(authOptions); // Get session directly

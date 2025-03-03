@@ -1,4 +1,3 @@
-// src/app/api/sendNotifications/route.ts
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 
@@ -6,7 +5,6 @@ export async function POST(req: Request) {
   const { clientName, clientPhone, clientEmail, serviceDetails } =
     await req.json();
 
-  // Validate required fields
   if (!clientName || !clientPhone || !clientEmail || !serviceDetails) {
     console.error("Missing required fields in the request body");
     return NextResponse.json(
@@ -15,7 +13,6 @@ export async function POST(req: Request) {
     );
   }
 
-  // Validate environment variables
   if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
     console.error("Missing email configuration in environment variables");
     return NextResponse.json(
@@ -37,11 +34,11 @@ export async function POST(req: Request) {
       service: "gmail",
       auth: {
         user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD, // Use an app-specific password if using Gmail with 2FA
+        pass: process.env.EMAIL_PASSWORD,
       },
     });
 
-    // 1. Send email to the client confirming the booking
+    // Send confirmation email to the client
     const clientMailOptions = {
       from: process.env.EMAIL_USERNAME,
       to: clientEmail,
@@ -50,7 +47,7 @@ export async function POST(req: Request) {
     };
     await transporter.sendMail(clientMailOptions);
 
-    // 2. Send SMS to the owner via email-to-SMS gateway
+    // Send SMS to the owner via email-to-SMS gateway
     if (process.env.OWNER_PHONE_SMS_EMAIL) {
       const serviceAbbreviations: Record<string, string> = {
         "Paint Protection Film": "PPF",
@@ -59,42 +56,49 @@ export async function POST(req: Request) {
         "Vehicle Vinyl Wrap": "VVW",
       };
 
-      // Extract vehicle details
-      const year = serviceDetails.match(/Vehicle Year: (.+)/)?.[1]?.trim() || "N/A";
-      const make = serviceDetails.match(/Vehicle Make: (.+)/)?.[1]?.trim() || "N/A";
-      const model = serviceDetails.match(/Vehicle Model: (.+)/)?.[1]?.trim() || "N/A";
+      const year =
+        serviceDetails.match(/Vehicle Year:? (.+)/)?.[1]?.trim() || "N/A";
+      const make =
+        serviceDetails.match(/Vehicle Make:? (.+)/)?.[1]?.trim() || "N/A";
+      const model =
+        serviceDetails.match(/Vehicle Model:? (.+)/)?.[1]?.trim() || "N/A";
 
-      // Extract additional info
-      const additionalInfo = serviceDetails.match(/Additional Info: (.+)/)?.[1]?.trim() || "None";
+      const additionalInfo =
+        serviceDetails.match(/Additional Info:? (.+)/)?.[1]?.trim() || "None";
 
-      // Extract and abbreviate selected services
-      const servicesLine = serviceDetails.match(/Selected Services: (.+)/)?.[1];
+      const servicesLine = serviceDetails.match(
+        /Selected Services:? (.+)/
+      )?.[1];
       const abbreviatedServices = servicesLine
         ? servicesLine
             .split(", ")
-            .map((service: string) => serviceAbbreviations[service.trim()] || service)
+            .map(
+              (service: string) =>
+                serviceAbbreviations[service.trim()] || service
+            )
             .join(", ")
         : "None";
 
       const smsMessage = `
-        New booking from ${clientName}.
-        Phone: ${clientPhone}
-        Car: ${year} ${make} ${model}
-        Services: ${abbreviatedServices}
-        Other Info: ${additionalInfo}
-      `.trim();
+      New booking from ${clientName}.
+      Phone: ${clientPhone}
+      Car: ${year} ${make} ${model}
+      Services: ${abbreviatedServices}
+      Other Info: ${additionalInfo}
+      `
+        .replace(/\n\s*\n/g, "\n")
+        .trim();
 
-      // SMS notification
       const smsMailOptions = {
         from: process.env.EMAIL_USERNAME,
         to: process.env.OWNER_PHONE_SMS_EMAIL,
-        subject: "", // No subject for SMS
+        subject: "",
         text: smsMessage,
       };
       await transporter.sendMail(smsMailOptions);
     }
 
-    // 3. Send a full email to the owner with booking details
+    // Send full booking details to the owner
     if (process.env.OWNER_EMAIL) {
       const ownerMailOptions = {
         from: process.env.EMAIL_USERNAME,
@@ -103,10 +107,6 @@ export async function POST(req: Request) {
         text: `New booking received:\n\nClient Name: ${clientName}\nPhone: ${clientPhone}\nEmail: ${clientEmail}\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
       };
       await transporter.sendMail(ownerMailOptions);
-    } else {
-      console.warn(
-        "OWNER_EMAIL is not defined, skipping owner email notification"
-      );
     }
 
     return NextResponse.json(
