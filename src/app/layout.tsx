@@ -4,6 +4,7 @@ import "./globals.css";
 import { NavBar } from "./components/NavBar";
 import Footer from "./components/Footer";
 import { Analytics } from '@vercel/analytics/next';
+import { AuthProvider } from "../lib/AuthProvicer";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +21,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <NavBar />
-        {children}
-        <Footer />
-        <Analytics />
+        <AuthProvider>
+          <NavBar />
+          {children}
+          <Footer />
+          <Analytics />
+        </AuthProvider>
       </body>
     </html>
   );
