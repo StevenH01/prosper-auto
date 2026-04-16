@@ -42,7 +42,7 @@ export const HeroSection = () => {
         </h1>
 
         <p className="text-zinc-400 text-sm sm:text-base max-w-sm mb-8 leading-relaxed">
-          Sacramento's premier tinting, wrapping, PPF, and ceramic coating specialists. Built for drivers who care.
+          Sacramento&apos;s premier tinting, wrapping, PPF, and ceramic coating specialists. Built for drivers who care.
         </p>
 
         {/* Certification badges */}

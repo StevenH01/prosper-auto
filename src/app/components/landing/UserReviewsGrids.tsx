@@ -18,7 +18,7 @@ const reviews: Review[] = [
     lastName: "Mai",
     car: "Honda Accord",
     review:
-      "Prosper auto works recently removed and retinted my Honda accord. There prices are so much better than any other shop I seen and the quality of these tint is perfect. It is nice and dark on the outside but from the inside you are still able to look out. I did my research on so many other shops and I found them to be the best fit. There location is really convenient and easy to find which helped. They gave me a run through of the service before I got it done and they walked me through the whole process which I found very professional. I also scheduled an appointment to have my house windows tinted too which I didn't even know was possible. Im very pleased with this company and love supporting local small owned business from hard working people like Phillip and Austin!",
+      "Prosper auto works recently removed and retinted my Honda accord. There prices are so much better than any other shop I seen and the quality of these tint is perfect. It is nice and dark on the outside but from the inside you are still able to look out. I did my research on so many other shops and I found them to be the best fit. There location is really convenient and easy to find which helped. They gave me a run through of the service before I got it done and they walked me through the whole process which I found very professional. I also scheduled an appointment to have my house windows tinted too which I didn&apos;t even know was possible. Im very pleased with this company and love supporting local small owned business from hard working people like Phillip and Austin!",
     service: "Ceramic Window Tint",
   },
   {
@@ -26,7 +26,7 @@ const reviews: Review[] = [
     lastName: "",
     car: "Tesla Model Y",
     review:
-      "I was pleased with the customer service from start to finish. Philip was very polite and professional. He took the time to clarify who packages he had to offer and what they entail. The process of receiving the quote and scheduling the appointment was quick. They also took the time to provide updates on the process. I am extremely happy with the outcome of the ceramic coating on my vehicle. I'd definitely recommend if you're looking to protecting your vehicle's paint.",
+      "I was pleased with the customer service from start to finish. Philip was very polite and professional. He took the time to clarify who packages he had to offer and what they entail. The process of receiving the quote and scheduling the appointment was quick. They also took the time to provide updates on the process. I am extremely happy with the outcome of the ceramic coating on my vehicle. I&apos;d definitely recommend if you&apos;re looking to protecting your vehicle&apos;s paint.",
     service: "Ceramic Coating",
   },
   {
@@ -42,7 +42,7 @@ const reviews: Review[] = [
     lastName: "Mai",
     car: "BMW E46 M3",
     review:
-      "Prosper Auto Werks applied 50% windshield tint to my car and everything was perfect. They respond super fast and are very informative on their service and all the aspects that go into it. They helped guide me through the process and the cost was so reasonable. They work in a timely manner and the quality is 10/10. it's been over 6 months and there is absolutely no bubbling or creasing. They also helped me with recommendation on my wrap and the when i should get it replaced. There prices are so reasonable and I have recommend them to countless people. Very professional and they truly do care about their clients and quality of work.",
+      "Prosper Auto Werks applied 50% windshield tint to my car and everything was perfect. They respond super fast and are very informative on their service and all the aspects that go into it. They helped guide me through the process and the cost was so reasonable. They work in a timely manner and the quality is 10/10. it&apos;s been over 6 months and there is absolutely no bubbling or creasing. They also helped me with recommendation on my wrap and the when i should get it replaced. There prices are so reasonable and I have recommend them to countless people. Very professional and they truly do care about their clients and quality of work.",
     service: "Window Tint",
   },
   {
@@ -50,7 +50,7 @@ const reviews: Review[] = [
     lastName: "Thatch",
     car: "Tesla Model Y",
     review:
-      "Prosper Auto Werks did a fantastic job with the Trenton Blue wrap on my Model Y. They were excellent at communicating every step of the process, making sure I understood all the details before moving forward. The wrap turned out beautifully, with a flawless finish that really stands out. They completed the work efficiently without sacrificing quality, and I couldn't be happier with the results. Highly recommend them for anyone looking for top-notch service and a quality wrap!",
+      "Prosper Auto Werks did a fantastic job with the Trenton Blue wrap on my Model Y. They were excellent at communicating every step of the process, making sure I understood all the details before moving forward. The wrap turned out beautifully, with a flawless finish that really stands out. They completed the work efficiently without sacrificing quality, and I couldn&apos;t be happier with the results. Highly recommend them for anyone looking for top-notch service and a quality wrap!",
     service: "Full Wrap",
   },
   {

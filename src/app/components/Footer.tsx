@@ -16,7 +16,7 @@ const Footer = () => {
               height={73}
             />
             <p className="text-zinc-600 text-xs leading-relaxed max-w-xs">
-              Sacramento's premier tinting, wrapping, PPF & ceramic coating specialists.
+              Sacramento&apos;s premier tinting, wrapping, PPF & ceramic coating specialists.
             </p>
             <a
               href="https://www.instagram.com/prosperautowerks/"

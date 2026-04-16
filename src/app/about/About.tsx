@@ -23,11 +23,11 @@ const About = () => {
         <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
           Founded in 2023 and rooted in Sacramento, Prosper Auto Werks delivers
           precision tinting, wrapping, paint protection, and ceramic coating.
-          Every vehicle gets the same attention to detail — whether it's a daily
+          Every vehicle gets the same attention to detail — whether it&apos;s a daily
           driver or a weekend toy.
         </p>
         <p className="text-zinc-400 text-sm leading-relaxed max-w-md">
-          Our team is 3M and WindshieldSkin certified, and we're committed to
+          Our team is 3M and WindshieldSkin certified, and we&apos;re committed to
           flawless finishes, honest pricing, and clear communication from first
           contact to key handover.
         </p>
