@@ -1,34 +1,73 @@
+"use client"
 import * as Dialog from '@radix-ui/react-dialog';
 import { Cross2Icon } from '@radix-ui/react-icons';
 import { useState } from 'react';
 import axios from 'axios';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast, ToastContainer } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+import { Poppins } from 'next/font/google';
 
-interface TimeSlot {
-  start: string;
-  end: string;
-}
+const poppins = Poppins({ weight: '800', subsets: ['latin'] });
 
 type ServiceKey = 'ppf' | 'windowTint' | 'ceramicCoating' | 'vinylWrap';
+
+const SERVICE_LABELS: Record<ServiceKey, string> = {
+  ppf: 'Paint Protection Film',
+  windowTint: 'Window Tint',
+  ceramicCoating: 'Ceramic Coating',
+  vinylWrap: 'Vinyl Wrap',
+};
+
+interface FormState {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  email: string;
+  vehicleYear: string;
+  vehicleMake: string;
+  vehicleModel: string;
+  additionalInfo: string;
+}
+
+interface FormErrors extends Omit<FormState, 'additionalInfo'> {
+  services: string;
+}
 
 interface CustomModalProps {
   closeModal: () => void;
 }
 
-const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
-  // Form fields state
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState('');
-  const [vehicleYear, setVehicleYear] = useState('');
-  const [vehicleMake, setVehicleMake] = useState('');
-  const [vehicleModel, setVehicleModel] = useState('');
-  const [additionalInfo, setAdditionalInfo] = useState('');
+const inputClass =
+  'bg-[#1a1a1a] border border-[#333] text-white text-sm px-3 py-2.5 w-full placeholder:text-zinc-600 focus:outline-none focus:border-red-600/60 transition-colors';
 
-  // Error state for each field
-  const [errors, setErrors] = useState({
+const StepLabel = ({ number, label }: { number: string; label: string }) => (
+  <div className="flex items-center gap-3">
+    <span className="text-red-600/30 font-black text-2xl leading-none select-none">{number}</span>
+    <span className="text-zinc-400 text-[10px] uppercase tracking-[0.2em] font-bold">{label}</span>
+    <div className="flex-1 h-px bg-[#242424]" />
+  </div>
+);
+
+const Field = ({
+  label,
+  error,
+  children,
+  className = '',
+}: {
+  label: string;
+  error?: string;
+  children: React.ReactNode;
+  className?: string;
+}) => (
+  <div className={`flex flex-col gap-1.5 ${className}`}>
+    <label className="text-zinc-500 text-[10px] uppercase tracking-[0.2em] font-bold">{label}</label>
+    {children}
+    {error && <span className="text-red-500 text-[11px]">{error}</span>}
+  </div>
+);
+
+const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
+  const [form, setForm] = useState<FormState>({
     firstName: '',
     lastName: '',
     phoneNumber: '',
@@ -36,265 +75,251 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
     vehicleYear: '',
     vehicleMake: '',
     vehicleModel: '',
-    services: ''
+    additionalInfo: '',
   });
 
-  // State to track selected services
-  const [services, setServices] = useState({
+  const [errors, setErrors] = useState<Partial<FormErrors>>({});
+
+  const [services, setServices] = useState<Record<ServiceKey, boolean>>({
     ppf: false,
     windowTint: false,
     ceramicCoating: false,
     vinylWrap: false,
   });
 
-  // Handle checkbox change with specific type
-  const handleServiceChange = (service: ServiceKey) => {
-    setServices((prev) => ({
-      ...prev,
-      [service]: !prev[service],
-    }));
-  };
+  const [loading, setLoading] = useState(false);
 
-  // Validation function
-  const validateForm = () => {
-    const newErrors = {
-      firstName: firstName ? '' : 'First name is required.',
-      lastName: lastName ? '' : 'Last name is required.',
-      phoneNumber: phoneNumber ? '' : 'Phone number is required.',
-      email: email ? '' : 'Email is required.',
-      vehicleYear: vehicleYear ? '' : 'Vehicle year is required.',
-      vehicleMake: vehicleMake ? '' : 'Vehicle make is required.',
-      vehicleModel: vehicleModel ? '' : 'Vehicle model is required.',
-      services: Object.values(services).some((selected) => selected)
-        ? ''
-        : 'Please select one of the following services.'
-    };
+  const setField =
+    (field: keyof FormState) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  const toggleService = (key: ServiceKey) =>
+    setServices((prev) => ({ ...prev, [key]: !prev[key] }));
+
+  const validate = (): boolean => {
+    const newErrors: Partial<FormErrors> = {};
+    if (!form.firstName) newErrors.firstName = 'Required.';
+    if (!form.lastName) newErrors.lastName = 'Required.';
+    if (!form.phoneNumber) newErrors.phoneNumber = 'Required.';
+    if (!form.email) newErrors.email = 'Required.';
+    if (!form.vehicleYear) newErrors.vehicleYear = 'Required.';
+    if (!form.vehicleMake) newErrors.vehicleMake = 'Required.';
+    if (!form.vehicleModel) newErrors.vehicleModel = 'Required.';
+    if (!Object.values(services).some(Boolean))
+      newErrors.services = 'Select at least one service.';
     setErrors(newErrors);
-
-    // Check if there are any errors
-    return Object.values(newErrors).every((error) => error === '');
+    return Object.keys(newErrors).length === 0;
   };
 
-  const handleBooking = async () => {
-    if (!validateForm()) return;
-  
-    const eventDetails = {
-      summary: 'Service Booking',
-      description: `Booking for a service by ${firstName} ${lastName}`,
-      start: { dateTime: new Date().toISOString() },
-      end: { dateTime: new Date(new Date().getTime() + 60 * 60 * 1000).toISOString() },
-    };
-  
-    const selectedServices = Object.entries(services)
-      .filter(([_, isSelected]) => isSelected)
-      .map(([service]) => service.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase()))
+  const handleSubmit = async () => {
+    if (!validate()) return;
+    setLoading(true);
+
+    const selectedServices = (Object.keys(services) as ServiceKey[])
+      .filter((k) => services[k])
+      .map((k) => SERVICE_LABELS[k])
       .join(', ');
-  
-    const serviceDetails = `
-      Vehicle Year: ${vehicleYear}
-      Vehicle Make: ${vehicleMake}
-      Vehicle Model: ${vehicleModel}
-      Selected Services: ${selectedServices}
-      Additional Info: ${additionalInfo}
-    `.trim();
-  
+
+    const serviceDetails = [
+      `Vehicle: ${form.vehicleYear} ${form.vehicleMake} ${form.vehicleModel}`,
+      `Services: ${selectedServices}`,
+      form.additionalInfo ? `Notes: ${form.additionalInfo}` : '',
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    const eventDetails = {
+      summary: `Service Booking — ${form.firstName} ${form.lastName}`,
+      description: serviceDetails,
+      start: { dateTime: new Date().toISOString() },
+      end: { dateTime: new Date(Date.now() + 60 * 60 * 1000).toISOString() },
+    };
+
     try {
       const res = await axios.post('/api/bookEvent', eventDetails);
       if (res.status === 200) {
-        toast.success('Thank you! Someone will reach out to you as soon as possible with a quote.');
-  
-        // Send notifications (SMS to owner and email to client)
         await axios.post('/api/sendNotifications', {
-          clientEmail: email,
-          clientName: `${firstName} ${lastName}`,
-          clientPhone: phoneNumber,
-          serviceDetails, // Pass the updated serviceDetails
+          clientEmail: form.email,
+          clientName: `${form.firstName} ${form.lastName}`,
+          clientPhone: form.phoneNumber,
+          serviceDetails,
           ownerEmail: 'prosperautowerks@gmail.com',
           ownerPhone: '+19168387384',
         });
-        closeModal();
+        toast.success("Request sent! We'll reach out shortly with a quote.");
+        setTimeout(closeModal, 3000);
       }
-    } catch (error) {
-      console.error('Error booking the event:', error);
-      toast.error('Failed to confirm booking. Please try again later.');
+    } catch {
+      toast.error('Something went wrong. Please try again or call us directly.');
+    } finally {
+      setLoading(false);
     }
-  };  
+  };
 
   return (
-    <Dialog.Root open onOpenChange={closeModal}>
-      <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black bg-opacity-50 z-40" />
+    <>
+      <Dialog.Root open onOpenChange={closeModal}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40" />
 
-        <Dialog.Content className="fixed top-1/2 left-1/2 max-h-[90vh] w-[90vw] sm:w-[60vw] md:w-[50vw] lg:w-[40vw] xl:w-[30vw] transform -translate-x-1/2 -translate-y-1/2 bg-white p-6 rounded-2xl shadow-lg z-50 overflow-y-auto">
-          <Dialog.Title className="text-xl font-bold mb-4">Let&apos;s get started!</Dialog.Title>
-          <Dialog.Description className="mb-6 text-sm text-gray-600">
-            Fill out the form below, or contact us directly at:
-          </Dialog.Description>
+          <Dialog.Content className="fixed top-1/2 left-1/2 max-h-[90vh] w-[92vw] sm:w-[520px] -translate-x-1/2 -translate-y-1/2 bg-[#111111] border border-[#242424] z-50 overflow-y-auto shadow-2xl">
+            {/* Header */}
+            <div className="sticky top-0 bg-[#111111] border-b border-[#242424] px-7 py-5 flex items-start justify-between z-10">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="h-px w-5 bg-red-600" />
+                  <span className="text-red-500 text-[10px] font-bold uppercase tracking-[0.3em]">
+                    Get a Quote
+                  </span>
+                </div>
+                <Dialog.Title className={`${poppins.className} text-white text-2xl uppercase`}>
+                  Book a Service
+                </Dialog.Title>
+              </div>
+              <Dialog.Close asChild>
+                <button
+                  onClick={closeModal}
+                  className="text-zinc-500 hover:text-white transition-colors p-1 mt-1"
+                  aria-label="Close"
+                >
+                  <Cross2Icon className="w-5 h-5" />
+                </button>
+              </Dialog.Close>
+            </div>
 
-          {/* Contact Details */}
-          <h3 className="text-lg font-semibold">Step 1: Contact Details</h3>
-          <div className="grid grid-cols-1 gap-4 mt-4">
-            <div className="flex flex-col">
-              <label className="font-semibold">First Name*</label>
-              <input
-                type="text"
-                value={firstName}
-                onChange={(e) => setFirstName(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your first name"
-              />
-              {errors.firstName && <p className="text-red-600 text-sm mt-1">{errors.firstName}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Last Name*</label>
-              <input
-                type="text"
-                value={lastName}
-                onChange={(e) => setLastName(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your last name"
-              />
-              {errors.lastName && <p className="text-red-600 text-sm mt-1">{errors.lastName}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Mobile Phone Number*</label>
-              <input
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your phone number"
-              />
-              {errors.phoneNumber && <p className="text-red-600 text-sm mt-1">{errors.phoneNumber}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Email Address*</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="Enter your email address"
-              />
-              {errors.email && <p className="text-red-600 text-sm mt-1">{errors.email}</p>}
-            </div>
-          </div>
+            <div className="px-7 py-6 flex flex-col gap-8">
+              {/* Step 1 — Contact */}
+              <section>
+                <StepLabel number="01" label="Contact Details" />
+                <div className="grid grid-cols-2 gap-3 mt-4">
+                  <Field label="First Name" error={errors.firstName}>
+                    <input
+                      type="text"
+                      value={form.firstName}
+                      onChange={setField('firstName')}
+                      placeholder="Jane"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Last Name" error={errors.lastName}>
+                    <input
+                      type="text"
+                      value={form.lastName}
+                      onChange={setField('lastName')}
+                      placeholder="Doe"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Phone Number" error={errors.phoneNumber} className="col-span-2">
+                    <input
+                      type="tel"
+                      value={form.phoneNumber}
+                      onChange={setField('phoneNumber')}
+                      placeholder="(916) 000-0000"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Email Address" error={errors.email} className="col-span-2">
+                    <input
+                      type="email"
+                      value={form.email}
+                      onChange={setField('email')}
+                      placeholder="jane@example.com"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              </section>
 
-          {/* Vehicle Information */}
-          <h3 className="text-lg font-semibold mt-6">Step 2: Vehicle Information</h3>
-          <div className="grid grid-cols-1 gap-4 mt-4">
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Year*</label>
-              <input
-                type="text"
-                value={vehicleYear}
-                onChange={(e) => setVehicleYear(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., 2017"
-              />
-              {errors.vehicleYear && <p className="text-red-600 text-sm mt-1">{errors.vehicleYear}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Make*</label>
-              <input
-                type="text"
-                value={vehicleMake}
-                onChange={(e) => setVehicleMake(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., Tesla"
-              />
-              {errors.vehicleMake && <p className="text-red-600 text-sm mt-1">{errors.vehicleMake}</p>}
-            </div>
-            <div className="flex flex-col">
-              <label className="font-semibold">Vehicle Model*</label>
-              <input
-                type="text"
-                value={vehicleModel}
-                onChange={(e) => setVehicleModel(e.target.value)}
-                className="border rounded px-3 py-2"
-                placeholder="e.g., Model S"
-              />
-              {errors.vehicleModel && <p className="text-red-600 text-sm mt-1">{errors.vehicleModel}</p>}
-            </div>
-          </div>
+              {/* Step 2 — Vehicle */}
+              <section>
+                <StepLabel number="02" label="Vehicle Info" />
+                <div className="grid grid-cols-3 gap-3 mt-4">
+                  <Field label="Year" error={errors.vehicleYear}>
+                    <input
+                      type="text"
+                      value={form.vehicleYear}
+                      onChange={setField('vehicleYear')}
+                      placeholder="2021"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Make" error={errors.vehicleMake}>
+                    <input
+                      type="text"
+                      value={form.vehicleMake}
+                      onChange={setField('vehicleMake')}
+                      placeholder="Tesla"
+                      className={inputClass}
+                    />
+                  </Field>
+                  <Field label="Model" error={errors.vehicleModel}>
+                    <input
+                      type="text"
+                      value={form.vehicleModel}
+                      onChange={setField('vehicleModel')}
+                      placeholder="Model 3"
+                      className={inputClass}
+                    />
+                  </Field>
+                </div>
+              </section>
 
-          {/* Services Section */}
-          <h3 className="text-lg font-semibold mt-6">Step 3: Select Services</h3>
-          <div className="grid grid-cols-2 gap-4 mt-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="ppf"
-                checked={services.ppf}
-                onChange={() => handleServiceChange("ppf")}
-              />
-              <label htmlFor="ppf" className="font-semibold">Paint Protection Film</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="window-tint"
-                checked={services.windowTint}
-                onChange={() => handleServiceChange("windowTint")}
-              />
-              <label htmlFor="window-tint" className="font-semibold">Window Tint</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="ceramic-coating"
-                checked={services.ceramicCoating}
-                onChange={() => handleServiceChange("ceramicCoating")}
-              />
-              <label htmlFor="ceramic-coating" className="font-semibold">Ceramic Coating</label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                id="vinyl-wrap"
-                checked={services.vinylWrap}
-                onChange={() => handleServiceChange("vinylWrap")}
-              />
-              <label htmlFor="vinyl-wrap" className="font-semibold">Vehicle Vinyl Wrap</label>
-            </div>
-          </div>
-          {errors.services && <p className="text-red-600 text-sm mt-1">{errors.services}</p>}
+              {/* Step 3 — Services */}
+              <section>
+                <StepLabel number="03" label="Select Services" />
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {(Object.keys(services) as ServiceKey[]).map((key) => (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => toggleService(key)}
+                      className={`text-left px-4 py-3 border text-xs font-bold uppercase tracking-widest transition-all duration-150 ${
+                        services[key]
+                          ? 'border-red-600 bg-red-600/10 text-white'
+                          : 'border-[#333] text-zinc-500 hover:border-zinc-500 hover:text-zinc-300'
+                      }`}
+                    >
+                      {services[key] && <span className="text-red-500 mr-1.5">✓</span>}
+                      {SERVICE_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+                {errors.services && (
+                  <p className="text-red-500 text-[11px] mt-2">{errors.services}</p>
+                )}
+              </section>
 
-          {/* Additional Information */}
-          <div className="mt-6">
-            <label className="font-semibold">Additional Information</label>
-            <textarea
-              value={additionalInfo}
-              onChange={(e) => setAdditionalInfo(e.target.value)}
-              className="border rounded px-3 py-2 w-full mt-2"
-              rows={4}
-              placeholder="Tell us more about your car's history or special requests"
-            ></textarea>
-          </div>
+              {/* Additional notes */}
+              <section>
+                <label className="text-zinc-500 text-[10px] uppercase tracking-[0.25em] font-bold">
+                  Additional Notes
+                </label>
+                <textarea
+                  value={form.additionalInfo}
+                  onChange={setField('additionalInfo')}
+                  rows={3}
+                  placeholder="Paint condition, coverage areas, special requests…"
+                  className={`${inputClass} mt-2 resize-none`}
+                />
+              </section>
 
-          <button
-            onClick={handleBooking}
-            className="mt-6 bg-blue-600 text-white px-6 py-2 rounded-md w-full"
-          >
-            Send Service Request
-          </button>
+              {/* Submit */}
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-red-900 disabled:cursor-not-allowed text-white text-xs font-bold uppercase tracking-[0.2em] py-4 transition-colors duration-200"
+              >
+                {loading ? 'Sending…' : 'Send Service Request'}
+              </button>
+            </div>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
-          <Dialog.Close asChild>
-            <button onClick={closeModal} className="absolute top-2 right-2 text-black">
-              <Cross2Icon />
-            </button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-      {/* Toast Container to display notifications */}
-      <ToastContainer 
-        position="top-center" // Change position to top-center
-        autoClose={5000} 
-        hideProgressBar={false} 
-        closeOnClick 
-        pauseOnHover 
-      />
-    </Dialog.Root>
+      <ToastContainer position="top-center" autoClose={4000} hideProgressBar theme="dark" />
+    </>
   );
 };
 
