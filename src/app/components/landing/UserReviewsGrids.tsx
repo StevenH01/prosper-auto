@@ -91,7 +91,7 @@ export const UserReviewsGrid: React.FC = () => {
             <Stars />
 
             {/* Large quote mark */}
-            <div className="text-red-600/20 text-7xl font-black leading-none mb-2 select-none">"</div>
+            <div className="text-red-600/20 text-7xl font-black leading-none mb-2 select-none">&quot;</div>
 
             <p className={`text-zinc-400 text-sm leading-relaxed mb-4 ${isExpanded ? "" : "line-clamp-5"}`}>
               {review.review}
