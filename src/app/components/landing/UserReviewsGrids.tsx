@@ -1,5 +1,8 @@
-"use client"
+"use client";
 import React, { useState } from "react";
+import { Poppins } from "next/font/google";
+
+const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
 type Review = {
   firstName: string;
@@ -15,7 +18,7 @@ const reviews: Review[] = [
     lastName: "Mai",
     car: "Honda Accord",
     review:
-      "Prosper auto works recently removed and retinted my Honda accord. There prices are so much better than any other shop I seen and the quality of these tint is perfect. It is nice and dark on the outside but from the inside you are still able to look out. I did my research on so many other shops and I found them to be the best fit. There location is really convenient and easy to find which helped. They gave me a run through of the service before I got it done and they walked me through the whole process which I found very professional. I also scheduled an appointment to have my house windows tinted too which I didn’t even know was possible. Im very pleased with this company and love supporting local small owned business from hard working people like Phillip and Austin!",
+      "Prosper auto works recently removed and retinted my Honda accord. There prices are so much better than any other shop I seen and the quality of these tint is perfect. It is nice and dark on the outside but from the inside you are still able to look out. I did my research on so many other shops and I found them to be the best fit. There location is really convenient and easy to find which helped. They gave me a run through of the service before I got it done and they walked me through the whole process which I found very professional. I also scheduled an appointment to have my house windows tinted too which I didn't even know was possible. Im very pleased with this company and love supporting local small owned business from hard working people like Phillip and Austin!",
     service: "Ceramic Window Tint",
   },
   {
@@ -39,7 +42,7 @@ const reviews: Review[] = [
     lastName: "Mai",
     car: "BMW E46 M3",
     review:
-      "Prosper Auto Werks applied 50% windshield tint to my car and everything was perfect. They respond super fast and are very informative on their service and all the aspects that go into it. They helped guide me through the process and the cost was so reasonable. They work in a timely manner and the quality is 10/10. it’s been over 6 months and there is absolutely no bubbling or creasing. They also helped me with recommendation on my wrap and the when i should get it replaced. There prices are so reasonable and I have recommend them to countless people. Very professional and they truly do care about their clients and quality of work.",
+      "Prosper Auto Werks applied 50% windshield tint to my car and everything was perfect. They respond super fast and are very informative on their service and all the aspects that go into it. They helped guide me through the process and the cost was so reasonable. They work in a timely manner and the quality is 10/10. it's been over 6 months and there is absolutely no bubbling or creasing. They also helped me with recommendation on my wrap and the when i should get it replaced. There prices are so reasonable and I have recommend them to countless people. Very professional and they truly do care about their clients and quality of work.",
     service: "Window Tint",
   },
   {
@@ -47,69 +50,76 @@ const reviews: Review[] = [
     lastName: "Thatch",
     car: "Tesla Model Y",
     review:
-      "Prosper Auto Werks did a fantastic job with the Trenton Blue wrap on my Model Y. They were excellent at communicating every step of the process, making sure I understood all the details before moving forward. The wrap turned out beautifully, with a flawless finish that really stands out. They completed the work efficiently without sacrificing quality, and I couldn’t be happier with the results. Highly recommend them for anyone looking for top-notch service and a quality wrap!",
-    service: "Ful Wrap",
+      "Prosper Auto Werks did a fantastic job with the Trenton Blue wrap on my Model Y. They were excellent at communicating every step of the process, making sure I understood all the details before moving forward. The wrap turned out beautifully, with a flawless finish that really stands out. They completed the work efficiently without sacrificing quality, and I couldn't be happier with the results. Highly recommend them for anyone looking for top-notch service and a quality wrap!",
+    service: "Full Wrap",
   },
   {
     firstName: "Christian",
     lastName: "Estadilla",
     car: "Mercedes GLC",
     review:
-      "Professional  team.  Great job and would be coming back to have my other GLC 300 ceramic tinted.",
+      "Professional team. Great job and would be coming back to have my other GLC 300 ceramic tinted.",
     service: "Ceramic Tint",
   },
 ];
+
+const Stars = () => (
+  <div className="flex gap-0.5 mb-4">
+    {[...Array(5)].map((_, i) => (
+      <svg key={i} className="w-3.5 h-3.5 text-red-500 fill-current" viewBox="0 0 20 20">
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+      </svg>
+    ))}
+  </div>
+);
 
 export const UserReviewsGrid: React.FC = () => {
   const [expandedReviews, setExpandedReviews] = useState<{ [key: number]: boolean }>({});
 
   const toggleExpanded = (index: number) => {
-    setExpandedReviews((prev) => ({
-      ...prev,
-      [index]: !prev[index],
-    }));
+    setExpandedReviews((prev) => ({ ...prev, [index]: !prev[index] }));
   };
 
-  const MAX_LINES = 6; // Set the number of lines before "Read More" appears
-
   return (
-    <div className="container">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-1">
-        {reviews.map((review, index) => {
-          const isExpanded = expandedReviews[index];
-          const shouldShowMoreButton = review.review.length > 300; // Adjust threshold based on content
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-[#242424]">
+      {reviews.map((review, index) => {
+        const isExpanded = expandedReviews[index];
+        const isLong = review.review.length > 260;
 
-          return (
-            <div
-              key={index}
-              className="bg-zinc-900 p-6 transform transition duration-300 hover:scale-[1.02]"
-            >
-              <p
-                className={`text-gray-300 mb-4 ${
-                  isExpanded ? "" : "line-clamp-6"
-                }`}
+        return (
+          <div key={index} className="bg-[#111111] p-7 flex flex-col group hover:bg-[#161616] transition-colors duration-200">
+            <Stars />
+
+            {/* Large quote mark */}
+            <div className="text-red-600/20 text-7xl font-black leading-none mb-2 select-none">"</div>
+
+            <p className={`text-zinc-400 text-sm leading-relaxed mb-4 ${isExpanded ? "" : "line-clamp-5"}`}>
+              {review.review}
+            </p>
+
+            {isLong && (
+              <button
+                onClick={() => toggleExpanded(index)}
+                className="text-red-500 text-xs font-bold uppercase tracking-widest mb-4 text-left hover:text-red-400 transition-colors"
               >
-                &ldquo;{review.review}&rdquo;
-              </p>
-              {shouldShowMoreButton && (
-                <button
-                  onClick={() => toggleExpanded(index)}
-                  className="text-amber-600 text-sm font-semibold mt-2"
-                >
-                  {isExpanded ? "Show Less" : "Read More"}
-                </button>
-              )}
-              <div className="flex flex-col mt-4">
-                <h3 className="text-sm font-semibold text-amber-600 uppercase">
-                  {review.firstName} {review.lastName}
-                </h3>
-                <p className="text-zinc-100 text-sm">{review.car}</p>
-                <p className="text-zinc-100 text-xs mt-1">{review.service}</p>
+                {isExpanded ? "Show Less ↑" : "Read More ↓"}
+              </button>
+            )}
+
+            <div className="mt-auto pt-4 border-t border-[#242424]">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className={`${poppins.className} text-white text-sm uppercase`}>
+                    {review.firstName} {review.lastName}
+                  </p>
+                  <p className="text-zinc-500 text-xs mt-0.5">{review.car}</p>
+                </div>
+                <span className="text-[10px] text-red-500/70 uppercase tracking-widest font-bold text-right">{review.service}</span>
               </div>
             </div>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 };

@@ -3,33 +3,48 @@
 @tailwind utilities;
 
 body {
-    background-color: #F6F1EE;
+    background-color: #080808;
+    color: #ffffff;
 }
 
 @keyframes roll {
-    0% {
-        transform: translateX(0%);
-    }
-
-    100% {
-        transform: translateX(-50%);
-    }
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
 }
 
 @keyframes roll-reverse {
-    0% {
-        transform: translateX(-50%);
-    }
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0%); }
+}
 
-    100% {
-        transform: translateX(0%);
-    }
+@keyframes fade-up {
+    0% { opacity: 0; transform: translateY(24px); }
+    100% { opacity: 1; transform: translateY(0); }
 }
 
 .animate-roll {
-    animation: roll 30s linear infinite;
+    animation: roll 40s linear infinite;
 }
 
 .animate-roll-reverse {
-    animation: roll-reverse 30s linear infinite;
+    animation: roll-reverse 40s linear infinite;
+}
+
+.animate-fade-up {
+    animation: fade-up 0.7s ease forwards;
+}
+
+.section-divider {
+    width: 48px;
+    height: 3px;
+    background: #dc2626;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #ffffff 0%, #a1a1aa 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }

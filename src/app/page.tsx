@@ -13,96 +13,117 @@ import Link from "next/link";
 import { LocationMap } from "./components/map/LocationMap";
 import { HeroSection } from "./components/landing/HeroSection";
 import { UserReviewsGrid } from "./components/landing/UserReviewsGrids";
-import { Poppins } from "next/font/google";
 import About from "./about/About";
 
 const address = "6611 Orange Ave Suite D, Sacramento, CA";
 
-const poppins = Poppins({
-  weight: "800",
-  subsets: ["latin"],
-});
-
 export default function Home() {
   return (
-    <main>
+    <main className="bg-[#080808]">
       <HeroSection />
-      {/* <div id="animation" className="py-10">
-        <AnimatedText text="Tint • Wrap • PPF • Ceramic Coating •" reverse />
-        <AnimatedText text="Sacramento, CA • 38.497712° N 121.384244° W •" />
-      </div> */}
-      <div
-        id="gallery"
-        className="flex flex-col items-center gap-4 px-10 sm:px-20 py-10"
-      >
-        <Heading text="Recent Jobs" />
+
+      {/* Animated ticker */}
+      <div className="border-y border-[#242424] bg-[#111111] py-4 overflow-hidden">
+        <AnimatedText text="Tint • Wrap • PPF • Ceramic Coating •" />
+      </div>
+
+      {/* Gallery */}
+      <section id="gallery" className="px-8 sm:px-16 py-20 max-w-screen-xl mx-auto">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+          <Heading text="Recent Work" label="Portfolio" />
+          <Link
+            href="https://www.instagram.com/prosperautowerks/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-zinc-500 hover:text-white transition-colors text-xs uppercase tracking-widest"
+          >
+            <InstagramLogoIcon className="w-4 h-4" />
+            @prosperautowerks
+          </Link>
+        </div>
         <ImageGallery />
-        <Link href="https://www.instagram.com/prosperautowerks/">
-          <div className="flex flex-row gap-1 items-center">
-            <InstagramLogoIcon />
-            <div className="font-bold uppercase text-xs">@prosperautowerks</div>
-          </div>
-        </Link>
-      </div>
-      <div
+      </section>
+
+      {/* Services */}
+      <section
         id="services"
-        className="flex flex-col px-10 sm:px-20 py-10 bg-zinc-900"
-        style={{
-          backgroundImage: "url('/textures/waves.svg')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-          backgroundRepeat: "no-repeat",
-        }}
+        className="px-8 sm:px-16 py-20 bg-[#0d0d0d] border-y border-[#1a1a1a]"
       >
-        <Heading text="Our Services" isWhite />
-        <OurServices />
-      </div>
-      <div id="about" className="px-10 sm:px-20 py-10">
-        <Heading text="About Us" />
+        <div className="max-w-screen-xl mx-auto">
+          <Heading text="Our Services" label="What We Do" />
+          <OurServices />
+        </div>
+      </section>
+
+      {/* About */}
+      <section id="about" className="px-8 sm:px-16 py-20 max-w-screen-xl mx-auto">
+        <Heading text="About Us" label="The Team" />
         <About />
-      </div>
-      <div id="location" className="flex flex-col gap-4 px-10 sm:px-20 py-10">
-        <Heading text="Customer-Trusted"/>
-        <UserReviewsGrid />
-      </div>
-      <div id="contact" className="gap-4 px-10 sm:px-20 py-10">
-        <Heading text="Contanct Us" />
-        <div className="flex flex-col sm:flex-row gap-1">
-          <div className="bg-zinc-900 w-full sm:w-1/2 p-5 flex flex-col gap-2 text-white font-bold uppercase">
-            <div className="flex flex-row gap-2 items-center">
-              <SewingPinFilledIcon />
-              <a
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="hover:underline"
-              >
-                {address}
-                </a>
-            </div>
-            <div className="flex flex-row gap-2 items-center">
-              <PersonIcon />
-              <a href="tel:+19168387384" className="hover:underline">
-                (916) 838-7384
-              </a>
-            </div>
-            <div className="flex flex-row gap-2 items-center">
-              <EnvelopeClosedIcon />
-              <a href="mailto:prosperauto@gmail.com" className="hover:underline">
-                prosperauto@gmail.com
-              </a>
-            </div>
-            <div>
-              <a href="https://www.google.com/search?q=prosper+autowerks&rlz=1C1UEAD_enUS1045US1045&oq=pr&gs_lcrp=EgZjaHJvbWUqBggAEEUYOzIGCAAQRRg7MhAIARAuGMcBGLEDGNEDGIAEMgYIAhBFGEAyBggDEEUYOTIGCAQQRRg8MgYIBRBFGDwyBggGEEUYPDIGCAcQRRg80gEIMTk1M2owajeoAgCwAgA&sourceid=chrome&ie=UTF-8#lrd=0x809ac5ea33ed8919:0x2d9030e20a6fa31c,1,,,,">
-                Write us a Review!
-              </a>
-            </div>
+      </section>
+
+      {/* Reviews */}
+      <section className="px-8 sm:px-16 py-20 bg-[#0d0d0d] border-y border-[#1a1a1a]">
+        <div className="max-w-screen-xl mx-auto">
+          <Heading text="What Clients Say" label="Reviews" />
+          <div className="mt-10">
+            <UserReviewsGrid />
           </div>
-          <div className="bg-zinc-900 w-full sm:w-1/2 p-5">
+          <div className="mt-6">
+            <a
+              href="https://www.google.com/search?q=prosper+autowerks#lrd=0x809ac5ea33ed8919:0x2d9030e20a6fa31c,1,,,,"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-zinc-500 text-xs uppercase tracking-widest hover:text-red-500 transition-colors"
+            >
+              Leave us a review →
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact */}
+      <section id="contact" className="px-8 sm:px-16 py-20 max-w-screen-xl mx-auto">
+        <Heading text="Find Us" label="Contact" />
+        <div className="flex flex-col sm:flex-row gap-px bg-[#242424] mt-10">
+          <div className="bg-[#111111] w-full sm:w-2/5 p-8 flex flex-col gap-5">
+            <a
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-start gap-3 text-zinc-400 hover:text-white transition-colors group"
+            >
+              <SewingPinFilledIcon className="w-4 h-4 mt-0.5 text-red-600 flex-shrink-0" />
+              <span className="text-sm leading-relaxed">{address}</span>
+            </a>
+            <a
+              href="tel:+19168387384"
+              className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
+            >
+              <PersonIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span className="text-sm">(916) 838-7384</span>
+            </a>
+            <a
+              href="mailto:prosperauto@gmail.com"
+              className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
+            >
+              <EnvelopeClosedIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span className="text-sm">prosperauto@gmail.com</span>
+            </a>
+            <a
+              href="https://www.instagram.com/prosperautowerks/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
+            >
+              <InstagramLogoIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
+              <span className="text-sm">@prosperautowerks</span>
+            </a>
+          </div>
+          <div className="bg-[#111111] w-full sm:w-3/5 min-h-[280px]">
             <LocationMap address={address} />
           </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

@@ -1,37 +1,36 @@
+"use client";
 import React from "react";
 import Image from "next/image";
 
-export const ImageGallery = () => {
-  // Assume you have an array of image filenames
-  const images = [
-    "image1.jpeg",
-    "image2.jpeg",
-    "image3.jpeg",
-    "image4.jpeg",
-    "image5.jpeg",
-    "image6.jpeg",
-    "image7.jpeg",
-    "image8.jpeg",
-    // "image9.jpeg",
-    // "image10.jpeg",
-    // "image11.jpeg",
-    // "image12.jpeg",
-  ];
+const galleryItems = [
+  { src: "image1.jpeg", label: "Window Tint" },
+  { src: "image2.jpeg", label: "Paint Protection Film" },
+  { src: "image3.jpeg", label: "Vinyl Wrap" },
+  { src: "image4.jpeg", label: "Ceramic Coating" },
+  { src: "image5.jpeg", label: "Window Tint" },
+  { src: "image6.jpeg", label: "Full Wrap" },
+  { src: "image7.jpeg", label: "PPF" },
+  { src: "image8.jpeg", label: "Ceramic Coating" },
+];
 
-  return (
-    <div id="gallery" className="container mx-auto px-4 py-8">
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-1">
-        {images.map((src, index) => (
-          <div key={index} className="aspect-square relative">
-            <Image
-              src={`/gallery/${src}?height=200&width=200`}
-              alt={`Gallery image ${index + 1}`}
-              fill
-              className="rounded-md object-cover"
-            />
-          </div>
-        ))}
+export const ImageGallery = () => (
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-[#242424] w-full">
+    {galleryItems.map(({ src, label }, index) => (
+      <div key={index} className="group relative aspect-square overflow-hidden bg-[#111111]">
+        <Image
+          src={`/gallery/${src}`}
+          alt={label}
+          fill
+          className="object-cover transition-transform duration-700 group-hover:scale-105"
+        />
+        {/* Dark overlay on hover */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/50 transition-all duration-300" />
+        {/* Label */}
+        <div className="absolute bottom-0 left-0 right-0 translate-y-full group-hover:translate-y-0 transition-transform duration-300 bg-gradient-to-t from-black/90 to-transparent p-4">
+          <span className="text-white text-xs font-bold uppercase tracking-[0.2em]">{label}</span>
+          <div className="h-px w-6 bg-red-600 mt-1" />
+        </div>
       </div>
-    </div>
-  );
-};
+    ))}
+  </div>
+);

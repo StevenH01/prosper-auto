@@ -8,14 +8,25 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      colors: {
+        surface: "#111111",
+        "surface-2": "#1a1a1a",
+        border: "#242424",
+        "accent-red": "#dc2626",
+      },
       keyframes: {
         roll: {
-          "0%": { transform: "translateX(0)" },
-          "100%": { transform: "translateX(100vw)" },
+          "0%": { transform: "translateX(0%)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
+        "roll-reverse": {
+          "0%": { transform: "translateX(-50%)" },
+          "100%": { transform: "translateX(0%)" },
         },
       },
       animation: {
-        roll: "roll 10s linear infinite",
+        roll: "roll 40s linear infinite",
+        "roll-reverse": "roll-reverse 40s linear infinite",
       },
     },
   },
