@@ -9,12 +9,13 @@ import { Poppins } from 'next/font/google';
 
 const poppins = Poppins({ weight: '800', subsets: ['latin'] });
 
-type ServiceKey = 'ppf' | 'windowTint' | 'ceramicCoating' | 'vinylWrap';
+export type ServiceKey = 'ppf' | 'windowTint' | 'ceramicCoating' | 'paintCorrection' | 'vinylWrap';
 
 const SERVICE_LABELS: Record<ServiceKey, string> = {
   ppf: 'Paint Protection Film',
   windowTint: 'Window Tint',
   ceramicCoating: 'Ceramic Coating',
+  paintCorrection: 'Paint Correction',
   vinylWrap: 'Vinyl Wrap',
 };
 
@@ -35,6 +36,8 @@ interface FormErrors extends Omit<FormState, 'additionalInfo'> {
 
 interface CustomModalProps {
   closeModal: () => void;
+  /** Services to pre-select, e.g. when opened from a specific service's quote button. */
+  initialServices?: ServiceKey[];
 }
 
 const inputClass =
@@ -66,7 +69,7 @@ const Field = ({
   </div>
 );
 
-const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
+const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices = [] }) => {
   const [form, setForm] = useState<FormState>({
     firstName: '',
     lastName: '',
@@ -81,10 +84,11 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
 
   const [services, setServices] = useState<Record<ServiceKey, boolean>>({
-    ppf: false,
-    windowTint: false,
-    ceramicCoating: false,
-    vinylWrap: false,
+    ppf: initialServices.includes('ppf'),
+    windowTint: initialServices.includes('windowTint'),
+    ceramicCoating: initialServices.includes('ceramicCoating'),
+    paintCorrection: initialServices.includes('paintCorrection'),
+    vinylWrap: initialServices.includes('vinylWrap'),
   });
 
   const [loading, setLoading] = useState(false);
@@ -144,8 +148,6 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal }) => {
           clientName: `${form.firstName} ${form.lastName}`,
           clientPhone: form.phoneNumber,
           serviceDetails,
-          ownerEmail: 'prosperautowerks@gmail.com',
-          ownerPhone: '+19168387384',
         });
         toast.success("Request sent! We'll reach out shortly with a quote.");
         setTimeout(closeModal, 3000);

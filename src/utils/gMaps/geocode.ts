@@ -12,8 +12,6 @@ export async function getCoordinates(address: string): Promise<Coordinates> {
   );
   const data = await response.json();
 
-  console.log("Geocoding API Response:", data); // Add this line
-
   if (data.status === "OK") {
     const { lat, lng } = data.results[0].geometry.location;
     return { lat, lng };

@@ -2,18 +2,90 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 
+// Best-effort per-IP rate limit. State is per server instance, so on
+// serverless hosts this slows abuse rather than fully preventing it.
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX = 5;
+const requestLog = new Map<string, number[]>();
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const recent = (requestLog.get(ip) || []).filter(
+    (t) => now - t < RATE_LIMIT_WINDOW_MS
+  );
+  recent.push(now);
+  requestLog.set(ip, recent);
+  return recent.length > RATE_LIMIT_MAX;
+}
+
+// Only accept requests sent from this site's own pages
+function isSameOrigin(req: Request): boolean {
+  const origin = req.headers.get("origin");
+  const host = req.headers.get("host");
+  if (!origin || !host) return false;
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_RE = /^[0-9+()\-.\s]{7,20}$/;
+
+// Collapse newlines so single-line fields can't inject extra lines
+const singleLine = (s: string) => s.replace(/[\r\n]+/g, " ").trim();
+
 export async function POST(req: Request) {
-  const { clientName, clientPhone, clientEmail, serviceDetails } =
-    await req.json();
+  if (!isSameOrigin(req)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+  if (isRateLimited(ip)) {
+    return NextResponse.json(
+      { error: "Too many requests, please try again later" },
+      { status: 429 }
+    );
+  }
+
+  let body: any;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+  }
+  const { clientName, clientPhone, clientEmail, serviceDetails } = body ?? {};
 
   // Validate required fields
-  if (!clientName || !clientPhone || !clientEmail || !serviceDetails) {
-    console.error("Missing required fields in the request body");
+  if (
+    typeof clientName !== "string" ||
+    typeof clientPhone !== "string" ||
+    typeof clientEmail !== "string" ||
+    typeof serviceDetails !== "string" ||
+    !clientName.trim() ||
+    !serviceDetails.trim()
+  ) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 }
     );
   }
+
+  if (
+    clientName.length > 100 ||
+    clientEmail.length > 254 ||
+    serviceDetails.length > 2000 ||
+    !EMAIL_RE.test(clientEmail) ||
+    !PHONE_RE.test(clientPhone)
+  ) {
+    return NextResponse.json({ error: "Invalid input" }, { status: 400 });
+  }
+
+  const name = singleLine(clientName);
+  const phone = singleLine(clientPhone);
+  const email = clientEmail.trim();
 
   // Validate environment variables
   if (!process.env.EMAIL_USERNAME || !process.env.EMAIL_PASSWORD) {
@@ -44,9 +116,9 @@ export async function POST(req: Request) {
     // 1. Send email to the client confirming the booking
     const clientMailOptions = {
       from: process.env.EMAIL_USERNAME,
-      to: clientEmail,
+      to: email,
       subject: "Booking Confirmation",
-      text: `Hello ${clientName},\n\nYour booking is confirmed!\n\n${serviceDetails}\n\nThank you!`,
+      text: `Hello ${name},\n\nYour booking is confirmed!\n\n${serviceDetails}\n\nThank you!`,
     };
     await transporter.sendMail(clientMailOptions);
 
@@ -77,8 +149,8 @@ export async function POST(req: Request) {
         : "None";
 
       const smsMessage = `
-        New booking from ${clientName}.
-        Phone: ${clientPhone}
+        New booking from ${name}.
+        Phone: ${phone}
         Car: ${year} ${make} ${model}
         Services: ${abbreviatedServices}
         Other Info: ${additionalInfo}
@@ -100,7 +172,7 @@ export async function POST(req: Request) {
         from: process.env.EMAIL_USERNAME,
         to: process.env.OWNER_EMAIL,
         subject: "New Job Inquiry - Booking Details",
-        text: `New booking received:\n\nClient Name: ${clientName}\nPhone: ${clientPhone}\nEmail: ${clientEmail}\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
+        text: `New booking received:\n\nClient Name: ${name}\nPhone: ${phone}\nEmail: ${email}\n${serviceDetails}\n\nPlease contact the client to confirm the appointment.`,
       };
       await transporter.sendMail(ownerMailOptions);
     } else {
