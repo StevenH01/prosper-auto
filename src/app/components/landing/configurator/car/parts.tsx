@@ -3,7 +3,12 @@ import styles from "../configurator.module.css";
 import { GROUND } from "./geometry";
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
+const rad = (deg: number) => (deg * Math.PI) / 180;
 const polar = (cx: number, cy: number, r: number, a: number) => `${r1(cx + r * Math.cos(a))} ${r1(cy + r * Math.sin(a))}`;
+
+/** Circular arc between two angles in degrees (clockwise, under 180° of sweep). */
+export const arcPath = (cx: number, cy: number, r: number, fromDeg: number, toDeg: number) =>
+  `M ${polar(cx, cy, r, rad(fromDeg))} A ${r} ${r} 0 0 1 ${polar(cx, cy, r, rad(toDeg))}`;
 
 /** Deterministic PRNG so server and client render identical "random" details. */
 export function seeded(seed: number) {
@@ -16,24 +21,62 @@ export function seeded(seed: number) {
   };
 }
 
-/** Gradients shared by every view; rendered once in the stage's <defs>. */
+/**
+ * Body paint is a dark metallic: a cool sky reflection across the top, a near-black
+ * horizon band, then a warmer floor bounce below. Gradients are in drawing space so the
+ * reflections stay put on the car as the camera moves.
+ */
+const Paint = ({ id, y1, y2, stops }: { id: string; y1: number; y2: number; stops: [number, string][] }) => (
+  <linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" y1={y1} x2="0" y2={y2}>
+    {stops.map(([offset, color]) => (
+      <stop key={offset} offset={offset} stopColor={color} />
+    ))}
+  </linearGradient>
+);
+
+/** Gradients, patterns and masks shared by every view; rendered once in the stage's <defs>. */
 export const CarDefs = () => (
   <>
+    <Paint
+      id="pc-paint-side"
+      y1={395}
+      y2={752}
+      stops={[[0, "#626b7b"], [0.16, "#3d4452"], [0.33, "#1c1f27"], [0.42, "#0a0b0e"], [0.53, "#14161b"], [0.69, "#2d2c35"], [0.83, "#1b1c22"], [0.93, "#0a0a0d"], [1, "#050506"]]}
+    />
+    <Paint
+      id="pc-paint-front"
+      y1={398}
+      y2={754}
+      stops={[[0, "#5a6272"], [0.2, "#262a33"], [0.29, "#454c59"], [0.5, "#303540"], [0.62, "#1b1e25"], [0.69, "#0b0c0f"], [0.8, "#1c1d23"], [0.9, "#2a2a32"], [1, "#050506"]]}
+    />
+    <Paint
+      id="pc-paint-rear"
+      y1={398}
+      y2={752}
+      stops={[[0, "#5a6272"], [0.18, "#2d323d"], [0.36, "#3a404c"], [0.5, "#21242c"], [0.62, "#0c0d10"], [0.75, "#191b21"], [0.88, "#2a2a32"], [1, "#050506"]]}
+    />
+    {/* Small painted parts (mirror caps, wing) */}
     <linearGradient id="pc-paint" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stopColor="#4a4d56" />
-      <stop offset="0.28" stopColor="#25272d" />
-      <stop offset="0.7" stopColor="#141518" />
-      <stop offset="1" stopColor="#09090b" />
+      <stop offset="0" stopColor="#566070" />
+      <stop offset="0.3" stopColor="#262a33" />
+      <stop offset="0.65" stopColor="#0f1014" />
+      <stop offset="1" stopColor="#2a2a31" />
     </linearGradient>
-    <linearGradient id="pc-glass" x1="0" y1="0" x2="0.25" y2="1">
-      <stop offset="0" stopColor="#a9bccf" />
-      <stop offset="0.55" stopColor="#5f7184" />
-      <stop offset="1" stopColor="#2e3843" />
+
+    <linearGradient id="pc-glass" x1="0" y1="0" x2="0.2" y2="1">
+      <stop offset="0" stopColor="#b7c8da" />
+      <stop offset="0.5" stopColor="#566a80" />
+      <stop offset="1" stopColor="#222c37" />
+    </linearGradient>
+    <linearGradient id="pc-pane-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#fff" stopOpacity="0.38" />
+      <stop offset="0.45" stopColor="#fff" stopOpacity="0.08" />
+      <stop offset="1" stopColor="#fff" stopOpacity="0" />
     </linearGradient>
     <linearGradient id="pc-rim-light" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stopColor="#fff" stopOpacity="0" />
-      <stop offset="0.25" stopColor="#fff" stopOpacity="0.8" />
-      <stop offset="0.75" stopColor="#fff" stopOpacity="0.8" />
+      <stop offset="0.2" stopColor="#dbe4f2" stopOpacity="0.9" />
+      <stop offset="0.8" stopColor="#dbe4f2" stopOpacity="0.9" />
       <stop offset="1" stopColor="#fff" stopOpacity="0" />
     </linearGradient>
     <linearGradient id="pc-sweep" x1="0" y1="0" x2="1" y2="0">
@@ -46,19 +89,78 @@ export const CarDefs = () => (
       <stop offset="0.5" stopColor="#fff" stopOpacity="0.85" />
       <stop offset="1" stopColor="#fff" stopOpacity="0" />
     </linearGradient>
+    {/* A long, soft studio-lightbox reflection: bright in the middle, fading at both ends */}
+    <linearGradient id="pc-softbox" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stopColor="#e8eefc" stopOpacity="0" />
+      <stop offset="0.14" stopColor="#e8eefc" stopOpacity="0.5" />
+      <stop offset="0.5" stopColor="#f5f8ff" stopOpacity="1" />
+      <stop offset="0.86" stopColor="#e8eefc" stopOpacity="0.5" />
+      <stop offset="1" stopColor="#e8eefc" stopOpacity="0" />
+    </linearGradient>
+    <radialGradient id="pc-spec">
+      <stop offset="0" stopColor="#fff" stopOpacity="0.85" />
+      <stop offset="0.45" stopColor="#dfe8fb" stopOpacity="0.28" />
+      <stop offset="1" stopColor="#dfe8fb" stopOpacity="0" />
+    </radialGradient>
+    <radialGradient id="pc-arch-ao">
+      <stop offset="0.76" stopColor="#000" stopOpacity="0.62" />
+      <stop offset="1" stopColor="#000" stopOpacity="0" />
+    </radialGradient>
+    <radialGradient id="pc-liner">
+      <stop offset="0" stopColor="#000" />
+      <stop offset="0.85" stopColor="#020203" />
+      <stop offset="1" stopColor="#0c0c0f" />
+    </radialGradient>
+
+    {/* Wheels and tyres */}
     <linearGradient id="pc-spoke" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stopColor="#71717a" />
-      <stop offset="1" stopColor="#2a2a2f" />
+      <stop offset="0" stopColor="#8e919c" />
+      <stop offset="0.45" stopColor="#3d3f47" />
+      <stop offset="1" stopColor="#1b1c20" />
     </linearGradient>
     <radialGradient id="pc-disc">
-      <stop offset="0.55" stopColor="#1c1c20" />
-      <stop offset="0.7" stopColor="#3f3f46" />
-      <stop offset="1" stopColor="#27272a" />
+      <stop offset="0.5" stopColor="#141519" />
+      <stop offset="0.62" stopColor="#292a30" />
+      <stop offset="0.68" stopColor="#53545c" />
+      <stop offset="1" stopColor="#2c2d33" />
     </radialGradient>
-    <linearGradient id="pc-tyre" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stopColor="#1c1c20" />
-      <stop offset="1" stopColor="#050506" />
+    <radialGradient id="pc-tyre-rad">
+      <stop offset="0.7" stopColor="#0a0a0c" />
+      <stop offset="0.8" stopColor="#1c1d22" />
+      <stop offset="0.9" stopColor="#25262c" />
+      <stop offset="0.96" stopColor="#101114" />
+      <stop offset="1" stopColor="#040405" />
+    </radialGradient>
+    <linearGradient id="pc-tyre-h" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stopColor="#040405" />
+      <stop offset="0.22" stopColor="#1c1d22" />
+      <stop offset="0.5" stopColor="#141519" />
+      <stop offset="0.78" stopColor="#1c1d22" />
+      <stop offset="1" stopColor="#040405" />
     </linearGradient>
+    <linearGradient id="pc-arch-shade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stopColor="#000" stopOpacity="0.8" />
+      <stop offset="0.55" stopColor="#000" stopOpacity="0.12" />
+      <stop offset="1" stopColor="#000" stopOpacity="0" />
+    </linearGradient>
+    <linearGradient id="pc-caliper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stopColor="#f04444" />
+      <stop offset="1" stopColor="#a31515" />
+    </linearGradient>
+
+    {/* Lights */}
+    <linearGradient id="pc-lens" x1="0" y1="0" x2="0.3" y2="1">
+      <stop offset="0" stopColor="#2c3846" />
+      <stop offset="0.5" stopColor="#0b0f14" />
+      <stop offset="1" stopColor="#04060a" />
+    </linearGradient>
+    <linearGradient id="pc-tail" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stopColor="#6b1111" />
+      <stop offset="0.5" stopColor="#c01f1f" />
+      <stop offset="1" stopColor="#8a1414" />
+    </linearGradient>
+
+    {/* Floor */}
     <radialGradient id="pc-shadow">
       <stop offset="0" stopColor="#000" stopOpacity="0.9" />
       <stop offset="1" stopColor="#000" stopOpacity="0" />
@@ -74,61 +176,151 @@ export const CarDefs = () => (
       <stop offset="0" stopColor="#e0f2fe" stopOpacity="0.2" />
       <stop offset="1" stopColor="#e0f2fe" stopOpacity="0.06" />
     </linearGradient>
+
+    {/* Patterns */}
+    <pattern id="pc-mesh" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect width="6" height="6" fill="#050506" />
+      <path d="M 0 0 H 6 M 0 0 V 6" stroke="#34363e" strokeWidth="1.3" />
+    </pattern>
+    <pattern id="pc-carbon" width="8" height="8" patternUnits="userSpaceOnUse">
+      <rect width="8" height="8" fill="#0a0a0c" />
+      <rect width="4" height="4" fill="#1d1e23" />
+      <rect x="4" y="4" width="4" height="4" fill="#1d1e23" />
+      <path d="M 0 8 L 8 0" stroke="#33353c" strokeWidth="0.6" opacity="0.6" />
+    </pattern>
   </>
 );
 
-/** Showroom floor: contact shadow plus a faded mirror image of the car. */
-export function Floor({ carId, width, cx }: { carId: string; width: number; cx: number }) {
+/**
+ * A soft highlight that follows a body line: stacked strokes fake a blur without
+ * paying for an SVG filter, and a gradient along x fades both ends. Clip it to the body.
+ */
+export function Sheen({
+  id,
+  d,
+  x0,
+  x1,
+  w = 12,
+  o = 0.3,
+  color = "#eef3ff",
+  vertical = false,
+}: {
+  id: string;
+  d: string;
+  /** Where the highlight starts and ends fading: x positions, or y positions when `vertical`. */
+  x0: number;
+  x1: number;
+  w?: number;
+  o?: number;
+  color?: string;
+  vertical?: boolean;
+}) {
+  const layers: [number, number][] = [[1.9, 0.14], [1, 0.28], [0.5, 0.55], [0.2, 1]];
+  return (
+    <g fill="none" strokeLinecap="round" pointerEvents="none">
+      <linearGradient id={id} gradientUnits="userSpaceOnUse" x1={vertical ? 0 : x0} y1={vertical ? x0 : 0} x2={vertical ? 0 : x1} y2={vertical ? x1 : 0}>
+        <stop offset="0" stopColor={color} stopOpacity="0" />
+        <stop offset="0.3" stopColor={color} stopOpacity="1" />
+        <stop offset="0.7" stopColor={color} stopOpacity="1" />
+        <stop offset="1" stopColor={color} stopOpacity="0" />
+      </linearGradient>
+      {layers.map(([k, a]) => (
+        <path key={k} d={d} stroke={`url(#${id})`} strokeWidth={w * k} strokeOpacity={o * a} />
+      ))}
+    </g>
+  );
+}
+
+/** Showroom floor: contact shadows plus a faded mirror image of the car. */
+export function Floor({ carId, width, cx, contacts = [] }: { carId: string; width: number; cx: number; contacts?: [number, number][] }) {
   return (
     <>
       <g mask="url(#pc-reflect)" opacity={0.9}>
         <use href={`#${carId}`} transform={`translate(0 ${GROUND * 2}) scale(1 -1)`} />
       </g>
       <ellipse cx={cx} cy={GROUND + 2} rx={width / 2} ry={14} fill="url(#pc-shadow)" />
+      {contacts.map(([x, w]) => (
+        <ellipse key={x} cx={x} cy={GROUND} rx={w / 2} ry={6} fill="url(#pc-shadow)" />
+      ))}
     </>
   );
 }
 
-/** Side-on centre-lock wheel: tyre, drilled disc, caliper and ten split spokes. */
-export function Wheel({ cx, cy, tyre, rim, caliper }: { cx: number; cy: number; tyre: number; rim: number; caliper: number }) {
-  const ca = (caliper * Math.PI) / 180;
+/** Side-on centre-lock wheel: tyre, drilled brake disc and caliper seen through ten forged spokes. */
+export function Wheel({
+  id,
+  cx,
+  cy,
+  tyre,
+  rim,
+  caliper,
+}: {
+  id: string;
+  cx: number;
+  cy: number;
+  tyre: number;
+  rim: number;
+  caliper: number;
+}) {
+  const ca = rad(caliper);
   const [ci, co] = [rim * 0.5, rim * 0.84];
   const caliperPath =
     `M ${polar(cx, cy, co, ca - 0.42)} A ${co} ${co} 0 0 1 ${polar(cx, cy, co, ca + 0.42)} ` +
     `L ${polar(cx, cy, ci, ca + 0.42)} A ${ci} ${ci} 0 0 0 ${polar(cx, cy, ci, ca - 0.42)} Z`;
-  const spokes: string[] = [];
+  const spokes: { d: string; lit: string }[] = [];
   for (let i = 0; i < 5; i++) {
     for (const offset of [-0.14, 0.14]) {
       const a = (i * 2 * Math.PI) / 5 - Math.PI / 2 + offset;
-      const [inner, outer] = [rim * 0.22, rim - 5];
-      spokes.push(
-        `M ${polar(cx, cy, inner, a - 0.2)} L ${polar(cx, cy, outer, a - 0.06)} ` +
-          `L ${polar(cx, cy, outer, a + 0.06)} L ${polar(cx, cy, inner, a + 0.2)} Z`,
-      );
+      const [inner, outer, wi, wo] = [rim * 0.22, rim - 5, 0.2, 0.06];
+      // The edge that faces the key light (up and to the left) gets a highlight.
+      const left = -0.6 * Math.sin(a) + 0.8 * Math.cos(a) > 0;
+      const [s, t] = left ? [-1, -1] : [1, 1];
+      spokes.push({
+        d:
+          `M ${polar(cx, cy, inner, a - wi)} L ${polar(cx, cy, outer, a - wo)} ` +
+          `L ${polar(cx, cy, outer, a + wo)} L ${polar(cx, cy, inner, a + wi)} Z`,
+        lit: `M ${polar(cx, cy, inner, a + s * wi)} L ${polar(cx, cy, outer, a + t * wo)}`,
+      });
     }
   }
   return (
     <g>
-      <circle cx={cx} cy={cy} r={tyre} fill="url(#pc-tyre)" stroke="#27272a" strokeWidth={1.5} />
-      <circle cx={cx} cy={cy} r={tyre - 7} fill="none" stroke="#18181b" strokeWidth={2} />
-      <path
-        d={`M ${polar(cx, cy, tyre - 2, -2.3)} A ${tyre - 2} ${tyre - 2} 0 0 1 ${polar(cx, cy, tyre - 2, -0.5)}`}
-        fill="none"
-        stroke="#fff"
-        strokeOpacity={0.14}
-        strokeWidth={2}
-      />
-      <circle cx={cx} cy={cy} r={rim} fill="#0c0c0e" />
+      <clipPath id={`${id}-tyre`}>
+        <circle cx={cx} cy={cy} r={tyre} />
+      </clipPath>
+      <circle cx={cx} cy={cy} r={tyre} fill="url(#pc-tyre-rad)" />
+      <circle cx={cx} cy={cy} r={tyre * 0.89} fill="none" stroke="#fff" strokeOpacity={0.09} strokeWidth={3} strokeDasharray="22 6 8 6 14 30 6 6 18 8" />
+      <circle cx={cx} cy={cy} r={tyre * 0.94} fill="none" stroke="#000" strokeOpacity={0.6} strokeWidth={1.2} />
+      <path d={arcPath(cx, cy, tyre - 1.5, -150, -50)} fill="none" stroke="#fff" strokeOpacity={0.16} strokeWidth={2} strokeLinecap="round" />
+      <g clipPath={`url(#${id}-tyre)`}>
+        <rect x={cx - tyre} y={cy - tyre} width={tyre * 2} height={tyre * 1.1} fill="url(#pc-arch-shade)" />
+      </g>
+
+      <circle cx={cx} cy={cy} r={rim} fill="#060608" />
       <circle cx={cx} cy={cy} r={rim * 0.8} fill="url(#pc-disc)" />
-      <circle cx={cx} cy={cy} r={rim * 0.64} fill="none" stroke="#52525b" strokeWidth={1.6} strokeDasharray="1.5 4.5" />
-      <path d={caliperPath} fill="#dc2626" stroke="#7f1d1d" strokeWidth={1} />
-      {spokes.map((d, i) => (
-        <path key={i} d={d} fill="url(#pc-spoke)" stroke="#a1a1aa" strokeOpacity={0.6} strokeWidth={0.8} />
+      <circle cx={cx} cy={cy} r={rim * 0.66} fill="none" stroke="#050506" strokeWidth={2.6} strokeDasharray="1.8 5.2" />
+      <circle cx={cx} cy={cy} r={rim * 0.58} fill="none" stroke="#050506" strokeWidth={2.2} strokeDasharray="1.6 5.4" strokeDashoffset={3} />
+      <path d={caliperPath} fill="url(#pc-caliper)" stroke="#5c0e0e" strokeWidth={1} />
+      <path d={arcPath(cx, cy, co - 1, caliper - 20, caliper + 8)} fill="none" stroke="#fff" strokeOpacity={0.35} strokeWidth={1.2} strokeLinecap="round" />
+
+      {spokes.map((s, i) => (
+        <g key={i}>
+          <path d={s.d} fill="url(#pc-spoke)" stroke="#0a0a0c" strokeWidth={0.8} strokeLinejoin="round" />
+          <path d={s.lit} stroke="#d4d6de" strokeOpacity={0.55} strokeWidth={1.1} strokeLinecap="round" />
+        </g>
       ))}
-      <circle cx={cx} cy={cy} r={rim} fill="none" stroke="#a1a1aa" strokeWidth={2.4} />
-      <circle cx={cx} cy={cy} r={rim - 3.5} fill="none" stroke="#3f3f46" strokeWidth={1} />
-      <circle cx={cx} cy={cy} r={rim * 0.22} fill="#27272a" stroke="#a1a1aa" strokeWidth={1} />
-      <circle cx={cx} cy={cy} r={rim * 0.1} fill="#dc2626" />
+
+      <circle cx={cx} cy={cy} r={rim} fill="none" stroke="#c4c7d1" strokeWidth={2.6} />
+      <circle cx={cx} cy={cy} r={rim - 3.2} fill="none" stroke="#17181c" strokeWidth={1.6} />
+      <path d={arcPath(cx, cy, rim, -150, -55)} fill="none" stroke="#fff" strokeOpacity={0.7} strokeWidth={2.6} strokeLinecap="round" />
+      <circle cx={cx} cy={cy} r={rim * 0.2} fill="#2a2b30" stroke="#a9acb7" strokeWidth={1.2} />
+      <polygon
+        points={Array.from({ length: 6 }, (_, i) => polar(cx, cy, rim * 0.135, (i * Math.PI) / 3)).join(" ")}
+        fill="#111114"
+        stroke="#6d6f79"
+        strokeWidth={0.9}
+      />
+      <circle cx={cx} cy={cy} r={rim * 0.055} fill="#dc2626" />
     </g>
   );
 }
@@ -137,10 +329,12 @@ export function Wheel({ cx, cy, tyre, rim, caliper }: { cx: number; cy: number; 
 export function Tyre({ x, y, w, h }: { x: number; y: number; w: number; h: number }) {
   return (
     <g>
-      <rect x={x} y={y} width={w} height={h} rx={12} fill="url(#pc-tyre)" stroke="#27272a" strokeWidth={1.5} />
+      <rect x={x} y={y} width={w} height={h} rx={12} fill="url(#pc-tyre-h)" stroke="#0e0e10" strokeWidth={1.5} />
       {[0.33, 0.67].map((f) => (
-        <line key={f} x1={x + w * f} y1={y + 8} x2={x + w * f} y2={y + h - 4} stroke="#1f1f23" strokeWidth={2} />
+        <line key={f} x1={x + w * f} y1={y + 8} x2={x + w * f} y2={y + h - 4} stroke="#060607" strokeWidth={2.2} />
       ))}
+      <line x1={x + 4} y1={y + 10} x2={x + 4} y2={y + h - 8} stroke="#fff" strokeOpacity={0.08} strokeWidth={1.5} />
+      <rect x={x} y={y} width={w} height={h * 0.28} rx={12} fill="url(#pc-arch-shade)" />
     </g>
   );
 }
@@ -177,6 +371,7 @@ export function Pane({
       <g clipPath={`url(#${id})`}>
         {children}
         <path d={d} fill="#020304" style={{ opacity: tintOpacity(shade), transition: "opacity 0.9s ease" }} />
+        <path d={d} fill="url(#pc-pane-sky)" />
         {shade !== null && (
           <rect
             key={shade}
@@ -192,14 +387,16 @@ export function Pane({
         <path
           d={`M ${x + w * 0.16} ${y - 20} L ${x + w * 0.4} ${y - 20} L ${x + w * 0.26} ${y + h + 20} L ${x + w * 0.02} ${y + h + 20} Z`}
           fill="#fff"
-          opacity={0.1}
+          opacity={0.12}
         />
       </g>
+      {/* Rubber seal, with a faint highlight on its outer edge */}
+      <path d={d} fill="none" stroke="#020203" strokeWidth={selected ? 0 : 3.2} strokeLinejoin="round" />
       <path
         d={d}
         fill="none"
-        stroke={selected ? "#ef4444" : "#050506"}
-        strokeWidth={selected ? 2.6 : 1.2}
+        stroke={selected ? "#ef4444" : "#3a3d46"}
+        strokeWidth={selected ? 2.6 : 0.8}
         strokeLinejoin="round"
         className={selected ? styles.selected : undefined}
       />

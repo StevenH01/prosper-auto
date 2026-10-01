@@ -7,6 +7,9 @@ import { OVERVIEW, SERVICES, type ServiceId, type Shot, type TintLevels, type Vi
 
 const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
+const NO_TINT: TintLevels = { windshield: null, front: null, rear: null };
+const defaultOptionIds = () => Object.fromEntries(SERVICES.map((s) => [s.id, s.options[0].id])) as Record<ServiceId, string>;
+
 const chip = (active: boolean) =>
   `-skew-x-12 border px-3.5 py-2 text-[11px] font-bold uppercase tracking-[0.15em] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-red-500 ${
     active ? "border-red-600 bg-red-600 text-white" : "border-[#333] text-zinc-400 hover:border-zinc-500 hover:text-white"
@@ -18,10 +21,8 @@ const chip = (active: boolean) =>
  */
 export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) => void }) {
   const [serviceId, setServiceId] = useState<ServiceId | null>(null);
-  const [optionIds, setOptionIds] = useState(
-    () => Object.fromEntries(SERVICES.map((s) => [s.id, s.options[0].id])) as Record<ServiceId, string>,
-  );
-  const [tint, setTint] = useState<TintLevels>({ windshield: null, front: null, rear: null });
+  const [optionIds, setOptionIds] = useState(defaultOptionIds);
+  const [tint, setTint] = useState<TintLevels>(NO_TINT);
   const [manualView, setManualView] = useState<ViewId | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -50,6 +51,15 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
     return option?.shots ?? [{ view: "side", focus: OVERVIEW.side }];
   }, [manualView, option]);
   const shotKey = manualView ? `cam-${manualView}` : option && service ? `${service.id}:${option.id}` : "idle";
+
+  const atDefault = !serviceId && !manualView && !tint.windshield && !tint.front && !tint.rear;
+  // Back to the stock car: side view, no service picked, factory glass.
+  const reset = () => {
+    setServiceId(null);
+    setManualView(null);
+    setOptionIds(defaultOptionIds());
+    setTint(NO_TINT);
+  };
 
   const selectService = (id: ServiceId) => {
     setServiceId(id);
@@ -83,6 +93,8 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
           calloutDetail={zone && tint[zone] !== null ? `${tint[zone]}% VLT` : undefined}
           onHotspot={selectService}
           onView={setManualView}
+          onReset={reset}
+          canReset={!atDefault}
         />
       </div>
 

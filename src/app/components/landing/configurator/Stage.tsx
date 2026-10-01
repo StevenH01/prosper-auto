@@ -74,9 +74,13 @@ export type StageProps = {
   calloutDetail?: string;
   onHotspot: (id: ServiceId) => void;
   onView: (view: ViewId) => void;
+  /** Back to the default view. */
+  onReset: () => void;
+  /** False when the car is already at its default view. */
+  canReset: boolean;
 };
 
-export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView }: StageProps) {
+export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView, onReset, canReset }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [animateCamera, setAnimateCamera] = useState(false);
@@ -177,7 +181,7 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
           }}
         >
           <g style={viewStyle(view === "side", reduced)}>
-            <Floor carId="pc-car-side" width={1300} cx={690} />
+            <Floor carId="pc-car-side" width={1300} cx={690} contacts={[[346, 230], [1062, 210]]} />
             <g id="pc-car-side">
               <SideView tint={tint} focus={tintFocus} />
             </g>
@@ -186,13 +190,13 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
             {serviceId === "ceramic" && <CeramicDemo coated={optionId === "coated"} />}
           </g>
           <g style={viewStyle(view === "front", reduced)}>
-            <Floor carId="pc-car-front" width={620} cx={CX} />
+            <Floor carId="pc-car-front" width={620} cx={CX} contacts={[[914, 110], [456, 110]]} />
             <g id="pc-car-front">
               <FrontView tint={tint} focus={tintFocus} hoodSelected={serviceId === "correction"} />
             </g>
           </g>
           <g style={viewStyle(view === "rear", reduced)}>
-            <Floor carId="pc-car-rear" width={620} cx={CX} />
+            <Floor carId="pc-car-rear" width={620} cx={CX} contacts={[[904, 130], [466, 130]]} />
             <g id="pc-car-rear">
               <RearView tint={tint} focus={tintFocus} />
             </g>
@@ -258,21 +262,44 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
         </p>
       </div>
 
-      <div className="absolute right-3 top-3 flex items-center gap-1 sm:right-5 sm:top-4" role="group" aria-label="Camera angle">
-        <span className="mr-2 hidden text-[9px] font-bold uppercase tracking-[0.3em] text-zinc-500 sm:block">Camera</span>
-        {VIEWS.map((v) => (
-          <button
-            key={v}
-            type="button"
-            onClick={() => onView(v)}
-            aria-pressed={v === view}
-            className={`-skew-x-12 border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-red-500 ${
-              v === view ? "border-red-600 bg-red-600 text-white" : "border-white/15 bg-black/40 text-zinc-400 hover:border-white/40 hover:text-white"
-            }`}
-          >
-            <span className="inline-block skew-x-12">{v}</span>
-          </button>
-        ))}
+      <div className="absolute right-3 top-3 flex items-center gap-3 sm:right-5 sm:top-4">
+        {/* aria-disabled (not disabled) so keyboard focus isn't lost when the click puts the car back to default */}
+        <button
+          type="button"
+          onClick={() => canReset && onReset()}
+          aria-disabled={!canReset}
+          aria-label="Reset the car to the default view"
+          className={`-skew-x-12 border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-red-500 ${
+            canReset
+              ? "border-white/30 bg-black/50 text-white hover:border-red-600 hover:text-red-400"
+              : "cursor-default border-white/10 bg-black/30 text-zinc-600"
+          }`}
+        >
+          <span className="inline-flex skew-x-12 items-center gap-1.5">
+            <svg viewBox="0 0 16 16" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+              <path d="M2.6 8a5.4 5.4 0 1 0 1.7-3.9" />
+              <path d="M2.4 2.2v3.2h3.2" />
+            </svg>
+            Reset
+          </span>
+        </button>
+
+        <div className="flex items-center gap-1" role="group" aria-label="Camera angle">
+          <span className="mr-2 hidden text-[9px] font-bold uppercase tracking-[0.3em] text-zinc-500 sm:block">Camera</span>
+          {VIEWS.map((v) => (
+            <button
+              key={v}
+              type="button"
+              onClick={() => onView(v)}
+              aria-pressed={v === view}
+              className={`-skew-x-12 border px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.2em] transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-red-500 ${
+                v === view ? "border-red-600 bg-red-600 text-white" : "border-white/15 bg-black/40 text-zinc-400 hover:border-white/40 hover:text-white"
+              }`}
+            >
+              <span className="inline-block skew-x-12">{v}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="pointer-events-none absolute bottom-3 left-4 sm:bottom-4 sm:left-5">
