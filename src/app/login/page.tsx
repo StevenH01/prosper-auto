@@ -1,14 +1,10 @@
 "use client"
 
 import { useState } from 'react';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@/utils/supabase/client';
 import { login, signup } from "./action";
 
-// Initialize Supabase client
-const supabase = createClient(
-  'https://tbflqnzspldkshsvaebe.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRiZmxxbnpzcGxka3Noc3ZhZWJlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MjMwNDgxNzEsImV4cCI6MjAzODYyNDE3MX0.fzYGK0h5w8ywvNanji3_58VjwU1YclC6y0q6zPhpUlM'
-);
+const supabase = createClient();
 
 export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);

@@ -1,0 +1,124 @@
+/* Service configurator animations. Everything here stops for reduced-motion users (bottom of file). */
+
+/* Pulsing outline on the selected glass / panel */
+.selected {
+  animation: select-pulse 1.6s ease-in-out infinite;
+}
+@keyframes select-pulse {
+  0%, 100% { stroke-opacity: 1; }
+  50% { stroke-opacity: 0.3; }
+}
+
+/* Squeegee highlight that sweeps across glass as film goes on */
+.squeegee {
+  opacity: 0;
+  animation: squeegee 0.9s cubic-bezier(0.6, 0, 0.3, 1) forwards;
+}
+@keyframes squeegee {
+  0% { transform: translateX(0); opacity: 0; }
+  12%, 85% { opacity: 1; }
+  100% { transform: translateX(var(--dist)); opacity: 0; }
+}
+
+/* Studio light sliding across the paint */
+.sweep {
+  animation: sweep 8s ease-in-out infinite;
+}
+.sweepFast {
+  animation: sweep 3.4s ease-in-out infinite;
+}
+@keyframes sweep {
+  0% { transform: translateX(0); }
+  60%, 100% { transform: translateX(var(--dist, 1800px)); }
+}
+
+/* PPF film edge */
+.march {
+  animation: march 1s linear infinite;
+}
+@keyframes march {
+  to { stroke-dashoffset: -22; }
+}
+
+.filmIn {
+  animation: fade-in 0.8s ease 0.5s both;
+}
+
+/* Ceramic: coated water beads up, then rolls off */
+.bead {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: bead var(--dur) cubic-bezier(0.55, 0, 0.85, 0.5) var(--delay) infinite both;
+}
+@keyframes bead {
+  0% { transform: translate(0, -18px) scale(0.2); opacity: 0; }
+  8% { transform: translate(0, 0) scale(1.2); opacity: 1; }
+  14%, 42% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(var(--dx), var(--roll)) scale(0.85); opacity: 1; }
+}
+
+/* Ceramic: uncoated water flattens into puddles and slowly sags */
+.puddle {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: puddle var(--dur) ease-out var(--delay) infinite both;
+}
+@keyframes puddle {
+  0% { transform: translateY(-16px) scale(0.2); opacity: 0; }
+  10% { transform: translateY(0) scale(0.9, 1); opacity: 0.9; }
+  70% { transform: translateY(4px) scale(1.5, 1.05); opacity: 0.75; }
+  100% { transform: translateY(9px) scale(1.7, 1.1); opacity: 0; }
+}
+
+.rain {
+  animation: rain var(--dur) linear var(--delay) infinite both;
+}
+@keyframes rain {
+  0% { transform: translate(0, 0); opacity: 0; }
+  15% { opacity: 0.55; }
+  100% { transform: translate(-40px, 190px); opacity: 0; }
+}
+
+.fadeIn {
+  animation: fade-in 0.6s ease both;
+}
+.fadeInSlow {
+  animation: fade-in 1.2s ease 0.8s both;
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+/* Paint correction: spinning polisher pad */
+.pad {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: spin 0.3s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Stage scrolled out of view */
+.paused * {
+  animation-play-state: paused !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .selected,
+  .sweep,
+  .sweepFast,
+  .march,
+  .filmIn,
+  .bead,
+  .puddle,
+  .fadeIn,
+  .fadeInSlow,
+  .pad {
+    animation: none;
+  }
+  .squeegee,
+  .rain {
+    display: none;
+  }
+}

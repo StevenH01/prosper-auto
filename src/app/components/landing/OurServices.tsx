@@ -1,74 +1,87 @@
 import { Poppins } from "next/font/google";
 
-const poppins = Poppins({
-  weight: "600",
-  subsets: ["latin"],
-});
+const poppins = Poppins({ weight: "800", subsets: ["latin"] });
+
+const services = [
+  {
+    number: "01",
+    title: "Window Tint",
+    description:
+      "Block UV rays, reduce heat, and add sleek privacy with our premium ceramic window tinting. Available in multiple shades and specs.",
+    imageSrc: "/gallery/image10.jpeg",
+    tag: "UV • Privacy • Style",
+  },
+  {
+    number: "02",
+    title: "Vinyl Wraps",
+    description:
+      "Full or partial colour changes, matte finishes, custom graphics — we transform vehicles with precision-cut premium vinyl.",
+    imageSrc: "/gallery/image6.jpeg",
+    tag: "Full Wrap • Partial • Custom",
+  },
+  {
+    number: "03",
+    title: "Paint Protection Film",
+    description:
+      "Invisible armour against chips, scratches, and road debris. Our PPF keeps your paint showroom-perfect for years.",
+    imageSrc: "/gallery/image2.jpeg",
+    tag: "Self-Healing • Invisible • Durable",
+  },
+  {
+    number: "04",
+    title: "Ceramic Coating",
+    description:
+      "A nano-ceramic layer that bonds to your paint, delivering hydrophobic protection, mirror gloss, and lasting shine.",
+    imageSrc: "/gallery/image8.jpeg",
+    tag: "Hydrophobic • Gloss • Protection",
+  },
+];
 
 const ServiceCard = ({
+  number,
   title,
   description,
-  imageSrc
+  imageSrc,
+  tag,
 }: {
+  number: string;
   title: string;
   description: string;
   imageSrc: string;
+  tag: string;
 }) => (
-  <div className="p-5 bg-zinc-950 rounded-md border-slate-50">
-    <img
-      src={imageSrc}
-      alt={title}
-      className="rounded-full object-cover mb-4 shadow-lg w-full h-48" // Add Tailwind classes here
-      height={50}
-      width={50}
-    />
-    <h3
-      className={`${poppins.className} font-bold text-xl text-zinc-200 uppercase mb-4`}
-    >
-      {title}
-    </h3>
-    <p className="text-zinc-300">{description}</p>
+  <div className="group relative flex flex-col bg-[#111111] border border-[#242424] hover:border-red-600/50 transition-all duration-300 overflow-hidden">
+    {/* Top red accent line */}
+    <div className="h-px bg-red-600 w-0 group-hover:w-full transition-all duration-500" />
+
+    {/* Image */}
+    <div className="relative overflow-hidden h-48">
+      <img
+        src={imageSrc}
+        alt={title}
+        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-transparent to-transparent" />
+    </div>
+
+    {/* Content */}
+    <div className="flex flex-col flex-1 p-6">
+      <div className="flex items-start justify-between mb-3">
+        <span className="text-red-600/40 font-black text-3xl leading-none select-none">{number}</span>
+        <span className="text-zinc-600 text-[10px] uppercase tracking-widest text-right leading-relaxed">{tag}</span>
+      </div>
+      <h3 className={`${poppins.className} text-white uppercase text-xl mb-3 leading-tight`}>
+        {title}
+      </h3>
+      <p className="text-zinc-500 text-sm leading-relaxed">{description}</p>
+    </div>
   </div>
 );
 
-export const OurServices = () => {
-  const services = [
-    {
-      title: "Window Tint",
-      description:
-        "Transform your ride with our premium window tinting! Enjoy a cooler interior, enhanced privacy, and sleek aesthetics while protecting yourself from harmful UV rays. Drive in comfort and style!",
-      imageSrc: "/gallery/image10.jpeg"
-    },
-    {
-      title: "Vinyl Wraps",
-      description:
-        "Unleash your vehicle's true potential with our stunning vinyl wraps! From bold color changes to intricate designs, we'll turn heads and protect your paint. Your car, your style, our expertise!",
-      imageSrc: "/gallery/image6.jpeg"
-    },
-    {
-      title: "Paint Protection Film",
-      description:
-        "Invisible armor for your precious ride! Our cutting-edge paint protection film shields against road debris, stone chips, and environmental hazards. Keep your car looking showroom-fresh for years to come!",
-      imageSrc: "/gallery/image2.jpeg"
-      },
-    {
-      title: "Ceramic Coating",
-      description:
-        "Experience the future of car care with our advanced ceramic coating! Enjoy a mirror-like shine, effortless cleaning, and unparalleled protection against environmental contaminants. Pamper your ride with the ultimate in long-lasting beauty!",
-      imageSrc: "/gallery/image8.jpeg"
-      },
-  ];
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10">
-      {services.map((service, index) => (
-        <ServiceCard
-          key={index}
-          title={service.title}
-          description={service.description}
-          imageSrc={service.imageSrc}
-        />
-      ))}
-    </div>
-  );
-};
+export const OurServices = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#242424] mt-10">
+    {services.map((service, index) => (
+      <ServiceCard key={index} {...service} />
+    ))}
+  </div>
+);
