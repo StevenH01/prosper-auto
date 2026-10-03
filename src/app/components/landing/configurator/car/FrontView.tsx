@@ -6,14 +6,14 @@ import { Pane, Sheen, Tyre } from "./parts";
 const groove = { fill: "none", stroke: "#000", strokeOpacity: 0.75, strokeWidth: 1.6, strokeLinecap: "round" } as const;
 
 /** Right-hand details; drawn twice, the second time mirrored. */
-function Half({ tint, focus, side }: { tint: TintLevels; focus: TintZone | null; side: "r" | "l" }) {
+function Half({ tint, focus, side, shine }: { tint: TintLevels; focus: TintZone | null; side: "r" | "l"; shine: number }) {
   const hl = FRONT.headlightR;
   return (
     <g transform={side === "l" ? MIRROR : undefined}>
       <Pane id={`pc-front-side-${side}`} d={FRONT.sideGlassR} box={FRONT.sideGlassBox} shade={tint.front} selected={focus === "front"} />
 
       {/* Reflections that follow the fender and hood creases */}
-      <g clipPath="url(#pc-front-body)" pointerEvents="none">
+      <g clipPath="url(#pc-front-body)" pointerEvents="none" style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         <Sheen id={`sh-fcrest-${side}`} d="M 852 505 C 880 515 900 532 910 558" x0={500} x1={564} w={8} o={0.4} vertical />
         <Sheen id={`sh-fhood-${side}`} d="M 836 502 C 826 536 812 568 798 594" x0={500} x1={598} w={9} o={0.3} vertical />
         <Sheen id={`sh-fbump-${side}`} d="M 930 650 C 944 672 942 696 932 710" x0={640} x1={712} w={6} o={0.22} vertical />
@@ -67,7 +67,7 @@ function Half({ tint, focus, side }: { tint: TintLevels; focus: TintZone | null;
 }
 
 /** Head-on view from slightly above, so the hood and windshield read clearly. */
-export function FrontView({ tint, focus, hoodSelected }: { tint: TintLevels; focus: TintZone | null; hoodSelected: boolean }) {
+export function FrontView({ tint, focus, hoodSelected, shine = 1 }: { tint: TintLevels; focus: TintZone | null; hoodSelected: boolean; shine?: number }) {
   return (
     <g>
       <clipPath id="pc-front-body">
@@ -86,12 +86,14 @@ export function FrontView({ tint, focus, hoodSelected }: { tint: TintLevels; foc
 
       <path d={FRONT.body} fill="url(#pc-paint-front)" />
       <g clipPath="url(#pc-front-body)" fill="none" pointerEvents="none">
+        <g style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         {/* Softbox reflection across the hood, a hot spot on the crown, and a bright lip along the nose */}
         <path d="M 588 522 C 640 512 730 512 782 522 L 796 566 C 740 574 630 574 574 566 Z" fill="url(#pc-softbox)" opacity={0.26} />
         <ellipse cx={685} cy={546} rx={92} ry={13} fill="url(#pc-spec)" opacity={0.8} />
         <Sheen id="sh-fnose" d="M 566 596 C 640 606 730 606 804 596" x0={556} x1={814} w={8} o={0.34} />
         <Sheen id="sh-fbrow" d="M 470 640 C 560 628 810 628 900 640" x0={462} x1={908} w={6} o={0.22} />
         <path d="M 478 690 C 560 684 810 684 892 690 L 892 698 C 810 692 560 692 478 698 Z" fill="url(#pc-softbox)" opacity={0.16} />
+        </g>
         <rect x={400} y={600} width={580} height={160} fill="#000" opacity={0.2} />
       </g>
 
@@ -124,8 +126,8 @@ export function FrontView({ tint, focus, hoodSelected }: { tint: TintLevels; foc
       <path d="M 586 687 L 784 687" stroke="#000" strokeOpacity={0.6} strokeWidth={2.6} />
       <path d={FRONT.lip} fill="url(#pc-carbon)" stroke="#1c1d21" strokeWidth={1} />
 
-      <Half tint={tint} focus={focus} side="r" />
-      <Half tint={tint} focus={focus} side="l" />
+      <Half tint={tint} focus={focus} side="r" shine={shine} />
+      <Half tint={tint} focus={focus} side="l" shine={shine} />
 
       <path d={FRONT.body} fill="none" stroke="#9aa3b5" strokeOpacity={0.3} strokeWidth={1.1} strokeLinejoin="round" />
       <path d={FRONT.topLine} fill="none" stroke="url(#pc-rim-light)" strokeWidth={2.2} strokeLinecap="round" />

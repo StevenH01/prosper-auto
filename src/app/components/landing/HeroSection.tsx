@@ -7,7 +7,7 @@ import { ServiceConfigurator } from "./configurator/ServiceConfigurator";
 const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
 export const HeroSection = () => {
-  const [quote, setQuote] = useState<{ services: ServiceKey[] } | null>(null);
+  const [quote, setQuote] = useState<{ services: ServiceKey[]; notes?: string } | null>(null);
 
   return (
     <section className="relative overflow-hidden bg-black pb-16 pt-28 sm:pb-20 sm:pt-36">
@@ -64,11 +64,11 @@ export const HeroSection = () => {
 
         {/* What we do: interactive garage */}
         <div className="-mx-8 mt-12 sm:mx-0 lg:mt-14">
-          <ServiceConfigurator onQuote={(key) => setQuote({ services: [key] })} />
+          <ServiceConfigurator onQuote={(key, notes) => setQuote({ services: [key], notes })} />
         </div>
       </div>
 
-      {quote && <CustomModal closeModal={() => setQuote(null)} initialServices={quote.services} />}
+      {quote && <CustomModal closeModal={() => setQuote(null)} initialServices={quote.services} initialNotes={quote.notes} />}
     </section>
   );
 };

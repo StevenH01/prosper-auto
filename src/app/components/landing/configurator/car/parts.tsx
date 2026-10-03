@@ -1,6 +1,7 @@
 import type { CSSProperties, ReactNode } from "react";
 import styles from "../configurator.module.css";
 import { GROUND } from "./geometry";
+import { ORIGINAL_PAINT, type PaintSpec, type Stop } from "./paint";
 
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const rad = (deg: number) => (deg * Math.PI) / 180;
@@ -26,41 +27,29 @@ export function seeded(seed: number) {
  * horizon band, then a warmer floor bounce below. Gradients are in drawing space so the
  * reflections stay put on the car as the camera moves.
  */
-const Paint = ({ id, y1, y2, stops }: { id: string; y1: number; y2: number; stops: [number, string][] }) => (
-  <linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" y1={y1} x2="0" y2={y2}>
+const Stops = ({ stops }: { stops: Stop[] }) => (
+  <>
     {stops.map(([offset, color]) => (
-      <stop key={offset} offset={offset} stopColor={color} />
+      <stop key={offset} offset={offset} style={{ stopColor: color, transition: "stop-color 0.7s ease" }} />
     ))}
+  </>
+);
+
+const Paint = ({ id, y1, y2, stops }: { id: string; y1: number; y2: number; stops: Stop[] }) => (
+  <linearGradient id={id} gradientUnits="userSpaceOnUse" x1="0" y1={y1} x2="0" y2={y2}>
+    <Stops stops={stops} />
   </linearGradient>
 );
 
 /** Gradients, patterns and masks shared by every view; rendered once in the stage's <defs>. */
-export const CarDefs = () => (
+export const CarDefs = ({ paint = ORIGINAL_PAINT }: { paint?: PaintSpec }) => (
   <>
-    <Paint
-      id="pc-paint-side"
-      y1={395}
-      y2={752}
-      stops={[[0, "#626b7b"], [0.16, "#3d4452"], [0.33, "#1c1f27"], [0.42, "#0a0b0e"], [0.53, "#14161b"], [0.69, "#2d2c35"], [0.83, "#1b1c22"], [0.93, "#0a0a0d"], [1, "#050506"]]}
-    />
-    <Paint
-      id="pc-paint-front"
-      y1={398}
-      y2={754}
-      stops={[[0, "#5a6272"], [0.2, "#262a33"], [0.29, "#454c59"], [0.5, "#303540"], [0.62, "#1b1e25"], [0.69, "#0b0c0f"], [0.8, "#1c1d23"], [0.9, "#2a2a32"], [1, "#050506"]]}
-    />
-    <Paint
-      id="pc-paint-rear"
-      y1={398}
-      y2={752}
-      stops={[[0, "#5a6272"], [0.18, "#2d323d"], [0.36, "#3a404c"], [0.5, "#21242c"], [0.62, "#0c0d10"], [0.75, "#191b21"], [0.88, "#2a2a32"], [1, "#050506"]]}
-    />
+    <Paint id="pc-paint-side" y1={395} y2={752} stops={paint.side} />
+    <Paint id="pc-paint-front" y1={398} y2={754} stops={paint.front} />
+    <Paint id="pc-paint-rear" y1={398} y2={752} stops={paint.rear} />
     {/* Small painted parts (mirror caps, wing) */}
     <linearGradient id="pc-paint" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stopColor="#566070" />
-      <stop offset="0.3" stopColor="#262a33" />
-      <stop offset="0.65" stopColor="#0f1014" />
-      <stop offset="1" stopColor="#2a2a31" />
+      <Stops stops={paint.small} />
     </linearGradient>
 
     <linearGradient id="pc-glass" x1="0" y1="0" x2="0.2" y2="1">
