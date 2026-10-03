@@ -1,6 +1,7 @@
 // src/app/api/sendNotifications/route.ts
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+import { buildOwnerSms, readBookingExtras } from "../../lib/bookingMessages";
 
 // Best-effort per-IP rate limit. State is per server instance, so on
 // serverless hosts this slows abuse rather than fully preventing it.
@@ -124,37 +125,10 @@ export async function POST(req: Request) {
 
     // 2. Send SMS to the owner via email-to-SMS gateway
     if (process.env.OWNER_PHONE_SMS_EMAIL) {
-      const serviceAbbreviations: Record<string, string> = {
-        "Paint Protection Film": "PPF",
-        "Window Tint": "WT",
-        "Ceramic Coating": "CC",
-        "Vehicle Vinyl Wrap": "VVW",
-      };
-
-      // Extract vehicle details
-      const year = serviceDetails.match(/Vehicle Year: (.+)/)?.[1]?.trim() || "N/A";
-      const make = serviceDetails.match(/Vehicle Make: (.+)/)?.[1]?.trim() || "N/A";
-      const model = serviceDetails.match(/Vehicle Model: (.+)/)?.[1]?.trim() || "N/A";
-
-      // Extract additional info
-      const additionalInfo = serviceDetails.match(/Additional Info: (.+)/)?.[1]?.trim() || "None";
-
-      // Extract and abbreviate selected services
-      const servicesLine = serviceDetails.match(/Selected Services: (.+)/)?.[1];
-      const abbreviatedServices = servicesLine
-        ? servicesLine
-            .split(", ")
-            .map((service: string) => serviceAbbreviations[service.trim()] || service)
-            .join(", ")
-        : "None";
-
-      const smsMessage = `
-        New booking from ${name}.
-        Phone: ${phone}
-        Car: ${year} ${make} ${model}
-        Services: ${abbreviatedServices}
-        Other Info: ${additionalInfo}
-      `.trim();
+      // The form sends vehicle, services and notes as separate fields. (This used to pull them out
+      // of the free text with regexes that didn't match the text the form sends, so texts arrived
+      // as "N/A".)
+      const smsMessage = buildOwnerSms({ name, phone, extras: readBookingExtras(body) });
 
       // SMS notification
       const smsMailOptions = {

@@ -6,10 +6,10 @@ import { Pane, Sheen, Tyre } from "./parts";
 const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
 /** Right-hand details; drawn twice, the second time mirrored. */
-function Half({ side }: { side: "r" | "l" }) {
+function Half({ side, shine }: { side: "r" | "l"; shine: number }) {
   return (
     <g transform={side === "l" ? MIRROR : undefined}>
-      <g clipPath="url(#pc-rear-body)" pointerEvents="none">
+      <g clipPath="url(#pc-rear-body)" pointerEvents="none" style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         <Sheen id={`sh-rhaunch-${side}`} d="M 880 520 C 920 540 940 566 946 600" x0={510} x1={604} w={9} o={0.34} vertical />
         <Sheen id={`sh-rbump-${side}`} d="M 936 640 C 946 660 944 684 938 698" x0={632} x1={702} w={6} o={0.22} vertical />
       </g>
@@ -26,7 +26,7 @@ function Half({ side }: { side: "r" | "l" }) {
 }
 
 /** Rear view from slightly above, so the rear window sits clear of the wing. */
-export function RearView({ tint, focus }: { tint: TintLevels; focus: TintZone | null }) {
+export function RearView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: TintZone | null; shine?: number }) {
   return (
     <g>
       <clipPath id="pc-rear-body">
@@ -40,11 +40,13 @@ export function RearView({ tint, focus }: { tint: TintLevels; focus: TintZone | 
 
       <path d={REAR.body} fill="url(#pc-paint-rear)" />
       <g clipPath="url(#pc-rear-body)" pointerEvents="none">
+        <g style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         <path d="M 440 596 C 520 560 850 560 930 596" fill="none" stroke="#eef3ff" strokeOpacity={0.14} strokeWidth={4} />
         <path d="M 560 530 C 620 520 750 520 810 530 L 826 556 C 760 562 610 562 544 556 Z" fill="url(#pc-softbox)" opacity={0.22} />
         <ellipse cx={685} cy={545} rx={100} ry={12} fill="url(#pc-spec)" opacity={0.7} />
         <Sheen id="sh-rshoulder" d="M 440 590 C 540 566 830 566 930 590" x0={430} x1={940} w={9} o={0.3} />
         <path d="M 478 690 C 560 684 810 684 892 690 L 892 698 C 810 692 560 692 478 698 Z" fill="url(#pc-softbox)" opacity={0.16} />
+        </g>
         <rect x={400} y={600} width={580} height={160} fill="#000" opacity={0.2} />
       </g>
 
@@ -90,8 +92,8 @@ export function RearView({ tint, focus }: { tint: TintLevels; focus: TintZone | 
         <line key={x} x1={x} y1={718} x2={x} y2={750} stroke="#000" strokeOpacity={0.8} strokeWidth={3} />
       ))}
 
-      <Half side="r" />
-      <Half side="l" />
+      <Half side="r" shine={shine} />
+      <Half side="l" shine={shine} />
 
       {/* Wing sits in front of the engine lid from this angle */}
       <path d={REAR.wingPlane} fill="url(#pc-paint-rear)" stroke="#05050a" strokeWidth={1.3} strokeLinejoin="round" />

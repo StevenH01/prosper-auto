@@ -38,6 +38,8 @@ interface CustomModalProps {
   closeModal: () => void;
   /** Services to pre-select, e.g. when opened from a specific service's quote button. */
   initialServices?: ServiceKey[];
+  /** Pre-filled notes, e.g. the wrap color or tint shade the visitor previewed. */
+  initialNotes?: string;
 }
 
 const inputClass =
@@ -69,7 +71,7 @@ const Field = ({
   </div>
 );
 
-const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices = [] }) => {
+const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices = [], initialNotes = '' }) => {
   const [form, setForm] = useState<FormState>({
     firstName: '',
     lastName: '',
@@ -78,7 +80,7 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices =
     vehicleYear: '',
     vehicleMake: '',
     vehicleModel: '',
-    additionalInfo: '',
+    additionalInfo: initialNotes,
   });
 
   const [errors, setErrors] = useState<Partial<FormErrors>>({});
@@ -120,10 +122,8 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices =
     if (!validate()) return;
     setLoading(true);
 
-    const selectedServices = (Object.keys(services) as ServiceKey[])
-      .filter((k) => services[k])
-      .map((k) => SERVICE_LABELS[k])
-      .join(', ');
+    const selectedKeys = (Object.keys(services) as ServiceKey[]).filter((k) => services[k]);
+    const selectedServices = selectedKeys.map((k) => SERVICE_LABELS[k]).join(', ');
 
     const serviceDetails = [
       `Vehicle: ${form.vehicleYear} ${form.vehicleMake} ${form.vehicleModel}`,
@@ -148,6 +148,9 @@ const CustomModal: React.FC<CustomModalProps> = ({ closeModal, initialServices =
           clientName: `${form.firstName} ${form.lastName}`,
           clientPhone: form.phoneNumber,
           serviceDetails,
+          vehicle: { year: form.vehicleYear, make: form.vehicleMake, model: form.vehicleModel },
+          services: selectedKeys,
+          notes: form.additionalInfo,
         });
         toast.success("Request sent! We'll reach out shortly with a quote.");
         setTimeout(closeModal, 3000);

@@ -44,8 +44,8 @@ const Footer = () => {
             <a href="tel:+19168387384" className="text-zinc-400 text-sm hover:text-white transition-colors">
               (916) 838-7384
             </a>
-            <a href="mailto:prosperauto@gmail.com" className="text-zinc-400 text-sm hover:text-white transition-colors">
-              prosperauto@gmail.com
+            <a href="mailto:prosperautowerks@gmail.com" className="text-zinc-400 text-sm hover:text-white transition-colors">
+              prosperautowerks@gmail.com
             </a>
             <p className="text-zinc-500 text-sm">6611 Orange Ave Suite D<br />Sacramento, CA</p>
           </div>

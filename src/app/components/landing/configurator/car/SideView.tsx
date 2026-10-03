@@ -40,7 +40,7 @@ export function SideLightSweep({ gloss }: { gloss: boolean }) {
 }
 
 /** Side profile, facing right. */
-export function SideView({ tint, focus }: { tint: TintLevels; focus: TintZone | null }) {
+export function SideView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: TintZone | null; shine?: number }) {
   return (
     <g>
       <clipPath id="pc-side-body">
@@ -66,7 +66,8 @@ export function SideView({ tint, focus }: { tint: TintLevels; focus: TintZone | 
           <circle key={a.cx} cx={a.cx} cy={a.cy} r={a.r + 36} fill="url(#pc-arch-ao)" />
         ))}
 
-        {/* Reflections that follow the body lines */}
+        {/* Reflections that follow the body lines; they fade out on satin and matte wraps */}
+        <g style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         <Sheen id="sh-haunch" d="M 130 574 C 200 532 322 510 452 532" x0={120} x1={462} w={22} o={0.36} />
         <Sheen id="sh-deck" d="M 332 466 C 292 480 256 494 226 506 C 190 519 152 534 122 548" x0={118} x1={336} w={8} o={0.3} />
         <Sheen id="sh-door" d="M 560 536 C 680 538 800 541 902 554" x0={552} x1={910} w={10} o={0.3} />
@@ -83,6 +84,7 @@ export function SideView({ tint, focus }: { tint: TintLevels; focus: TintZone | 
         <ellipse cx={300} cy={518} rx={40} ry={8} transform="rotate(-14 300 518)" fill="url(#pc-spec)" />
         <ellipse cx={1090} cy={548} rx={34} ry={7} transform="rotate(16 1090 548)" fill="url(#pc-spec)" />
         <ellipse cx={724} cy={540} rx={60} ry={6} fill="url(#pc-spec)" opacity={0.7} />
+        </g>
       </g>
 
       {/* Glass */}

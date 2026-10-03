@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import { Poppins } from "next/font/google";
 import type { ServiceKey } from "../../CustomModal";
 import { Stage } from "./Stage";
 import { OVERVIEW, SERVICES, type ServiceId, type Shot, type TintLevels, type ViewId } from "./services";
+import { STOCK_COLOR, WRAP_COLORS, paintFor, type WrapFinish } from "./wraps";
 
 const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
@@ -19,16 +20,24 @@ const chip = (active: boolean) =>
  * Interactive hero garage: pick a service and the camera moves to the part of
  * the car it protects, with an animated demo and a short explanation.
  */
-export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) => void }) {
+export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, notes?: string) => void }) {
   const [serviceId, setServiceId] = useState<ServiceId | null>(null);
   const [optionIds, setOptionIds] = useState(defaultOptionIds);
   const [tint, setTint] = useState<TintLevels>(NO_TINT);
+  const [wrapColor, setWrapColor] = useState(STOCK_COLOR);
   const [manualView, setManualView] = useState<ViewId | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const service = SERVICES.find((s) => s.id === serviceId) ?? null;
   const option = service?.options.find((o) => o.id === optionIds[service.id]) ?? null;
   const zone = service?.id === "tint" ? option?.zone ?? null : null;
+
+  // The wrap color and finish repaint the car; the finish is the wrap service's selected option.
+  const wrapFinish = (optionIds.wrap ?? "gloss") as WrapFinish;
+  const wrap = WRAP_COLORS.find((c) => c.id === wrapColor) ?? WRAP_COLORS[0];
+  const wrapped = wrap.id !== STOCK_COLOR;
+  const paint = useMemo(() => paintFor(wrapColor, wrapFinish), [wrapColor, wrapFinish]);
+  const finishLabel = wrapFinish[0].toUpperCase() + wrapFinish.slice(1);
 
   // Film goes on the first time a pane is shown, once the camera has arrived.
   useEffect(() => {
@@ -52,13 +61,30 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
   }, [manualView, option]);
   const shotKey = manualView ? `cam-${manualView}` : option && service ? `${service.id}:${option.id}` : "idle";
 
-  const atDefault = !serviceId && !manualView && !tint.windshield && !tint.front && !tint.rear;
-  // Back to the stock car: side view, no service picked, factory glass.
+  const atDefault = !serviceId && !manualView && !wrapped && !tint.windshield && !tint.front && !tint.rear;
+  // Back to the stock car: side view, no service picked, factory glass, original paint.
   const reset = () => {
     setServiceId(null);
     setManualView(null);
     setOptionIds(defaultOptionIds());
     setTint(NO_TINT);
+    setWrapColor(STOCK_COLOR);
+  };
+
+  // What the visitor previewed, so the quote form can pre-fill it for the shop.
+  const quoteNotes = (id: ServiceId): string => {
+    if (id === "wrap" && wrapped) return `Vinyl wrap: ${wrap.name}, ${wrapFinish} finish.`;
+    if (id === "tint") {
+      const parts = [
+        ["windshield", tint.windshield],
+        ["front windows", tint.front],
+        ["rear windows", tint.rear],
+      ]
+        .filter(([, v]) => v !== null)
+        .map(([name, v]) => `${name} ${v}%`);
+      return parts.length ? `Window tint: ${parts.join(", ")}.` : "";
+    }
+    return "";
   };
 
   const selectService = (id: ServiceId) => {
@@ -90,7 +116,16 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
           optionId={option?.id ?? null}
           tint={tint}
           tintFocus={zone}
-          calloutDetail={zone && tint[zone] !== null ? `${tint[zone]}% VLT` : undefined}
+          calloutDetail={
+            zone && tint[zone] !== null
+              ? `${tint[zone]}% VLT`
+              : service?.id === "wrap"
+                ? wrapped
+                  ? `${wrap.name} · ${finishLabel}`
+                  : "Original paint"
+                : undefined
+          }
+          paint={paint}
           onHotspot={selectService}
           onView={setManualView}
           onReset={reset}
@@ -102,7 +137,8 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
       <div
         role="tablist"
         aria-label="Services"
-        className="relative flex overflow-x-auto border-y border-[#242424] [scrollbar-width:none] sm:grid sm:grid-cols-4 [&::-webkit-scrollbar]:hidden"
+        className="relative flex overflow-x-auto border-y border-[#242424] [scrollbar-width:none] sm:grid sm:[grid-template-columns:repeat(var(--n),minmax(0,1fr))] [&::-webkit-scrollbar]:hidden"
+        style={{ "--n": SERVICES.length } as CSSProperties}
       >
         {SERVICES.map((s, i) => {
           const active = s.id === serviceId;
@@ -154,7 +190,34 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
             </div>
 
             <div className="flex flex-col gap-5">
-              {service.options.length > 1 && (
+              {service.id === "wrap" && (
+                <div>
+                  <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+                    Color <span className="ml-1 normal-case tracking-normal text-zinc-300">{wrap.name}</span>
+                  </p>
+                  <div role="group" aria-label="Wrap color" className="flex flex-wrap gap-2.5">
+                    {WRAP_COLORS.map((c) => (
+                      <button
+                        key={c.id}
+                        type="button"
+                        aria-pressed={c.id === wrapColor}
+                        aria-label={c.name}
+                        title={c.name}
+                        onClick={() => setWrapColor(c.id)}
+                        className={`h-8 w-8 rounded-full border transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+                          c.id === wrapColor
+                            ? "scale-110 border-white ring-2 ring-red-600 ring-offset-2 ring-offset-[#0b0b0b]"
+                            : "border-white/25 hover:scale-110"
+                        }`}
+                        style={{ background: c.id === STOCK_COLOR ? "linear-gradient(135deg, #4a5160 0%, #0b0c0f 100%)" : c.hex }}
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-2.5 text-xs leading-relaxed text-zinc-400">These are sample colors, not our only options. Real vinyl can look different in person and in different light. Ask us about the full range of colors and finishes.</p>
+                </div>
+              )}
+
+              {service.options.length > 1 && !(service.id === "wrap" && !wrapped) && (
                 <div>
                   <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">{service.optionsLabel}</p>
                   <div className="flex flex-wrap gap-2">
@@ -167,7 +230,9 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
                 </div>
               )}
 
-              <p className="border-l-2 border-red-600 pl-4 text-sm leading-relaxed text-zinc-300">{option.blurb}</p>
+              <p className="border-l-2 border-red-600 pl-4 text-sm leading-relaxed text-zinc-300">
+                {service.id === "wrap" && !wrapped ? "You're looking at the car's original paint. Pick a color above to preview a wrap." : option.blurb}
+              </p>
 
               {zone && option.shades && (
                 <div>
@@ -187,14 +252,18 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey) =>
                       </button>
                     ))}
                   </div>
-                  <p className="mt-2 text-[11px] text-zinc-600">Preview only. Ask us about California tint laws.</p>
                 </div>
               )}
+
+              <div className="flex flex-col gap-1 border border-[#2a2a2a] bg-[#0f0f0f] p-3.5 sm:flex-row sm:gap-3">
+                <span className="flex-shrink-0 text-[10px] font-bold uppercase leading-relaxed tracking-[0.2em] text-red-500">Please note</span>
+                <p className="text-xs leading-relaxed text-zinc-400">{service.notice}</p>
+              </div>
 
               <div className="flex flex-wrap items-center gap-x-5 gap-y-3 pt-1">
                 <button
                   type="button"
-                  onClick={() => onQuote(service.quoteKey)}
+                  onClick={() => onQuote(service.quoteKey, quoteNotes(service.id))}
                   className="bg-red-600 px-6 py-3 text-xs font-bold uppercase tracking-[0.2em] text-white transition-colors hover:bg-red-700"
                 >
                   Get a {service.name} quote

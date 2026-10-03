@@ -4,7 +4,7 @@ import { FRONT, SIDE, type Point } from "./car/geometry";
 export type ViewId = "side" | "front" | "rear";
 /** Region of the drawing to frame: [x, y, width, height]. See car/geometry.ts for the coordinate space. */
 export type Focus = [number, number, number, number];
-export type ServiceId = "tint" | "ppf" | "ceramic" | "correction";
+export type ServiceId = "tint" | "wrap" | "ppf" | "ceramic" | "correction";
 export type TintZone = "windshield" | "front" | "rear";
 /** Visible light transmission per zone, in percent. `null` means factory glass (no film). */
 export type TintLevels = Record<TintZone, number | null>;
@@ -34,6 +34,8 @@ export type Service = {
   name: string;
   tagline: string;
   description: string;
+  /** Plain-language disclaimer shown under the service's controls, just above the quote button. */
+  notice: string;
   /** Which service the quote form pre-selects. */
   quoteKey: ServiceKey;
   /** Where this service's hotspot sits on the idle side view. */
@@ -63,7 +65,9 @@ export const SERVICES: Service[] = [
     name: "Window Tint",
     tagline: "Heat rejection · UV block · Privacy",
     description:
-      "Nano-ceramic film that rejects infrared heat and blocks 99% of UV, without interfering with phone, GPS or radar signals. You get a cooler cabin, a protected interior and a cleaner look.",
+      "Nano-ceramic film that helps reject infrared heat and block UV, without interfering with phone, GPS or radar signals. It helps keep the cabin cooler and your interior out of the sun, and gives the car a cleaner look.",
+    notice:
+      "The shades shown are illustrations, and film can look different on real glass and in different light. Heat and UV performance depends on the film you choose. Tint laws vary, so we'll go over what's allowed on your vehicle.",
     quoteKey: "windowTint",
     hotspot: [650, 478],
     optionsLabel: "Choose glass",
@@ -72,10 +76,10 @@ export const SERVICES: Service[] = [
         id: "windshield",
         label: "Front Windshield",
         zone: "windshield",
-        shades: [80, 70, 50],
+        shades: [70, 50],
         defaultShade: 70,
         blurb:
-          "A clear, heat-rejecting film for the windshield. It cuts infrared heat and glare while keeping your view crisp. Ask about WindshieldSkin impact protection too.",
+          "A clear, heat-rejecting film for the windshield. It helps cut infrared heat and glare while keeping your view clear. Ask us about WindshieldSkin, too.",
         shots: [
           { view: "front", focus: [440, 384, 490, 206], callout: { at: [800, 446], label: "Front windshield" } },
         ],
@@ -97,7 +101,7 @@ export const SERVICES: Service[] = [
         shades: SIDE_SHADES,
         defaultShade: 20,
         blurb:
-          "The small quarter windows behind the doors, plus the big rear window. The film is heat-shrunk to the curve of the glass in one piece: no seams, no bubbles.",
+          "The small quarter windows behind the doors, plus the big rear window. The film is heat-shrunk to the curve of the glass for a clean, factory-style look.",
         shots: [
           {
             view: "side",
@@ -111,12 +115,47 @@ export const SERVICES: Service[] = [
     ],
   },
   {
-    id: "ppf",
+    id: "wrap",
     number: "02",
-    name: "Paint Protection Film",
-    tagline: "Self-healing · Invisible · Chip-proof",
+    name: "Vinyl Wrap",
+    tagline: "Color change · Gloss · Satin · Matte",
     description:
-      "A clear, self-healing urethane film that takes the hit so your paint doesn't. Rock chips, road rash and bug etching stay on the film, and light swirls heal away with heat.",
+      "Premium vinyl film that goes over your car's existing paint to change its color and finish. Pick a color and a finish below and the car changes right here.",
+    notice:
+      "A wrap is applied over your existing paint, and how it goes on and comes off depends on that paint's condition. Repainted, damaged or peeling paint can be affected, so we'll inspect your paint with you before we start.",
+    quoteKey: "vinylWrap",
+    hotspot: [250, 545],
+    optionsLabel: "Finish",
+    options: [
+      {
+        id: "gloss",
+        label: "Gloss",
+        blurb: "A deep, wet-look shine like fresh paint. It makes bright colors pop.",
+        shots: [{ view: "side", focus: OVERVIEW.side, callout: { at: [690, 592], label: "Full wrap" } }],
+      },
+      {
+        id: "satin",
+        label: "Satin",
+        blurb: "A soft sheen between gloss and matte. It shows off the body lines and hides fingerprints better than gloss.",
+        shots: [{ view: "side", focus: OVERVIEW.side, callout: { at: [690, 592], label: "Full wrap" } }],
+      },
+      {
+        id: "matte",
+        label: "Matte",
+        blurb: "A flat, no-reflection finish for a stealth look. Hand-wash it and skip the wax.",
+        shots: [{ view: "side", focus: OVERVIEW.side, callout: { at: [690, 592], label: "Full wrap" } }],
+      },
+    ],
+  },
+  {
+    id: "ppf",
+    number: "03",
+    name: "Paint Protection Film",
+    tagline: "Self-healing · Clear · Chip-resistant",
+    description:
+      "A clear, self-healing urethane film applied over your paint to help guard it against rock chips, road rash and bug etching. Light swirls in the film can heal with heat.",
+    notice:
+      "Protection isn't guaranteed. Film helps resist chips and light scratches, but a hard enough impact, a deep scratch or heavy road debris can still damage the film or the paint under it. The rock demo is an illustration, not a promise of results.",
     quoteKey: "ppf",
     hotspot: [1282, 684],
     optionsLabel: "Coverage",
@@ -125,12 +164,12 @@ export const SERVICES: Service[] = [
         id: "partial",
         label: "Partial Front",
         blurb:
-          "The bumper, the leading 18–24 in. of the hood and fenders, and the mirror caps. This covers the areas that take the most rock chips.",
+          "The bumper, the leading 18–24 in. of the hood and fenders, and the mirror caps. These are the areas that tend to take the most rock chips.",
         shots: [
           {
             view: "side",
             focus: [960, 450, 600, 340],
-            callout: { at: SIDE.bumperImpact, label: "Impact absorbed", detail: "Paint untouched" },
+            callout: { at: SIDE.bumperImpact, label: "Rock strike", detail: "Film helps protect the paint" },
           },
         ],
       },
@@ -142,7 +181,7 @@ export const SERVICES: Service[] = [
           {
             view: "side",
             focus: [780, 420, 780, 380],
-            callout: { at: SIDE.bumperImpact, label: "Impact absorbed", detail: "Paint untouched" },
+            callout: { at: SIDE.bumperImpact, label: "Rock strike", detail: "Film helps protect the paint" },
           },
         ],
       },
@@ -150,12 +189,12 @@ export const SERVICES: Service[] = [
         id: "full-body",
         label: "Full Body",
         blurb:
-          "Every painted panel covered. This is the most protection you can get for track days, road trips and resale value.",
+          "Every painted panel covered, for the widest coverage on track days, road trips and long-term care.",
         shots: [
           {
             view: "side",
             focus: [40, 385, 1500, 420],
-            callout: { at: SIDE.bumperImpact, label: "Impact absorbed", detail: "Paint untouched" },
+            callout: { at: SIDE.bumperImpact, label: "Rock strike", detail: "Film helps protect the paint" },
           },
         ],
       },
@@ -163,11 +202,13 @@ export const SERVICES: Service[] = [
   },
   {
     id: "ceramic",
-    number: "03",
+    number: "04",
     name: "Ceramic Coating",
     tagline: "Hydrophobic · Deep gloss · Easy wash",
     description:
-      "A liquid nano-ceramic that bonds to your clear coat and forms a hard, glossy, hydrophobic layer. Water beads up and rolls off, taking dirt with it, so washing takes half the time.",
+      "A liquid nano-ceramic that bonds to your clear coat and forms a hard, glossy, hydrophobic layer. Water beads up and rolls off, which helps dirt wash away more easily.",
+    notice:
+      "A coating adds a layer of protection but isn't a shield. It doesn't make paint scratch-proof, chip-proof or immune to etching, and your car still needs regular washing and care. Results and how long they last vary with prep, care and driving conditions.",
     quoteKey: "ceramicCoating",
     hotspot: [1030, 560],
     optionsLabel: "Compare",
@@ -175,7 +216,7 @@ export const SERVICES: Service[] = [
       {
         id: "coated",
         label: "Coated",
-        blurb: "Water beads up tight and rolls straight off the fender. Road grime and minerals have nothing to grip.",
+        blurb: "Water beads up and rolls off the fender, and dirt has a harder time sticking.",
         shots: [
           {
             view: "side",
@@ -187,7 +228,7 @@ export const SERVICES: Service[] = [
       {
         id: "uncoated",
         label: "Uncoated",
-        blurb: "Bare clear coat holds water in flat puddles that dry into mineral spots and slowly etch the paint.",
+        blurb: "Bare clear coat holds water in flat puddles that can dry into mineral spots and, over time, etch the paint.",
         shots: [
           {
             view: "side",
@@ -200,11 +241,13 @@ export const SERVICES: Service[] = [
   },
   {
     id: "correction",
-    number: "04",
+    number: "05",
     name: "Paint Correction",
-    tagline: "Swirl removal · Scratch repair · Mirror finish",
+    tagline: "Swirl reduction · Light scratches · Deep gloss",
     description:
-      "Machine compounding and polishing level the clear coat to remove swirl marks, light scratches and oxidation. That brings back a true mirror reflection before any protection goes on.",
+      "Machine compounding and polishing level the clear coat to reduce swirl marks, light scratches and oxidation, bringing back depth and gloss before any protection goes on.",
+    notice:
+      "Results depend on your paint. Deep scratches, chips and thin or repainted clear coat may improve but not disappear, and we can only correct what the paint allows. The before-and-after is an illustration.",
     quoteKey: "paintCorrection",
     hotspot: [720, 612],
     options: [

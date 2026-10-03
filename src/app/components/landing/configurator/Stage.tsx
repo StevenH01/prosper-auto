@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 import styles from "./configurator.module.css";
 import { CX, type Point } from "./car/geometry";
 import { CarDefs, Floor } from "./car/parts";
+import type { PaintSpec } from "./car/paint";
 import { SideLightSweep, SideView } from "./car/SideView";
 import { FrontView } from "./car/FrontView";
 import { RearView } from "./car/RearView";
@@ -43,7 +44,10 @@ function viewStyle(active: boolean, reduced: boolean): CSSProperties {
 }
 
 function Callout({ left, top, width, label, detail }: { left: number; top: number; width: number; label: string; detail?: string }) {
-  const flipX = left > width * 0.6;
+  // Put the label on whichever side has room, and let it wrap rather than run off the stage.
+  const roomRight = width - left;
+  const flipX = roomRight < 240 && left > roomRight;
+  const room = (flipX ? left : roomRight) - 40;
   const flipY = top < 110;
   const dy = flipY ? 30 : -30;
   return (
@@ -53,11 +57,14 @@ function Callout({ left, top, width, label, detail }: { left: number; top: numbe
         <polyline points={`0,0 ${flipX ? -26 : 26},${dy} ${flipX ? -96 : 96},${dy}`} fill="none" stroke="rgba(255,255,255,0.55)" />
       </svg>
       <div
-        className={`absolute whitespace-nowrap ${flipX ? "text-right" : ""}`}
-        style={{ [flipX ? "right" : "left"]: 32, [flipY ? "top" : "bottom"]: 36 }}
+        className={`absolute ${flipX ? "text-right" : ""}`}
+        style={{ [flipX ? "right" : "left"]: 32, [flipY ? "top" : "bottom"]: 36, width: "max-content", maxWidth: Math.max(120, room) }}
       >
-        <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">{label}</p>
-        {detail && <p className="mt-0.5 text-xs font-bold uppercase tracking-[0.15em] text-red-400">{detail}</p>}
+        {/* Dark backing keeps the label readable over any body color */}
+        <div className="inline-block bg-black/70 px-2.5 py-1.5 backdrop-blur-[2px]">
+          <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-white">{label}</p>
+          {detail && <p className="mt-0.5 text-xs font-bold uppercase tracking-[0.15em] text-red-400">{detail}</p>}
+        </div>
       </div>
     </div>
   );
@@ -78,9 +85,11 @@ export type StageProps = {
   onReset: () => void;
   /** False when the car is already at its default view. */
   canReset: boolean;
+  /** Body paint, so a vinyl wrap can recolor the car. */
+  paint: PaintSpec;
 };
 
-export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView, onReset, canReset }: StageProps) {
+export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView, onReset, canReset, paint }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [animateCamera, setAnimateCamera] = useState(false);
@@ -172,7 +181,7 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
 
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" role="img" aria-label={description}>
         <defs>
-          <CarDefs />
+          <CarDefs paint={paint} />
         </defs>
         <g
           style={{
@@ -183,7 +192,7 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
           <g style={viewStyle(view === "side", reduced)}>
             <Floor carId="pc-car-side" width={1300} cx={690} contacts={[[346, 230], [1062, 210]]} />
             <g id="pc-car-side">
-              <SideView tint={tint} focus={tintFocus} />
+              <SideView tint={tint} focus={tintFocus} shine={paint.shine} />
             </g>
             <SideLightSweep gloss={serviceId === "ceramic" && optionId === "coated"} />
             {serviceId === "ppf" && optionId && <PpfDemo coverage={optionId} running={running && view === "side"} />}
@@ -192,13 +201,13 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
           <g style={viewStyle(view === "front", reduced)}>
             <Floor carId="pc-car-front" width={620} cx={CX} contacts={[[914, 110], [456, 110]]} />
             <g id="pc-car-front">
-              <FrontView tint={tint} focus={tintFocus} hoodSelected={serviceId === "correction"} />
+              <FrontView tint={tint} focus={tintFocus} hoodSelected={serviceId === "correction"} shine={paint.shine} />
             </g>
           </g>
           <g style={viewStyle(view === "rear", reduced)}>
             <Floor carId="pc-car-rear" width={620} cx={CX} contacts={[[904, 130], [466, 130]]} />
             <g id="pc-car-rear">
-              <RearView tint={tint} focus={tintFocus} />
+              <RearView tint={tint} focus={tintFocus} shine={paint.shine} />
             </g>
           </g>
         </g>

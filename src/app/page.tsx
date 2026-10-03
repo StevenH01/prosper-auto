@@ -103,11 +103,11 @@ export default function Home() {
               <span className="text-sm">(916) 838-7384</span>
             </a>
             <a
-              href="mailto:prosperauto@gmail.com"
+              href="mailto:prosperautowerks@gmail.com"
               className="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
             >
               <EnvelopeClosedIcon className="w-4 h-4 text-red-600 flex-shrink-0" />
-              <span className="text-sm">prosperauto@gmail.com</span>
+              <span className="text-sm">prosperautowerks@gmail.com</span>
             </a>
             <a
               href="https://www.instagram.com/prosperautowerks/"
