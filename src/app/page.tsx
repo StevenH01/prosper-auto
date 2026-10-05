@@ -16,6 +16,8 @@ import { UserReviewsGrid } from "./components/landing/UserReviewsGrids";
 import About from "./about/About";
 
 const address = "6611 Orange Ave Suite D, Sacramento, CA";
+// The shop's coordinates, so the map doesn't have to look the address up on every visit. Update them if the address changes.
+const addressPosition = { lat: 38.488954, lng: -121.426873 };
 
 export default function Home() {
   return (
@@ -120,7 +122,7 @@ export default function Home() {
             </a>
           </div>
           <div className="bg-[#111111] w-full sm:w-3/5 min-h-[280px]">
-            <LocationMap address={address} />
+            <LocationMap address={address} position={addressPosition} />
           </div>
         </div>
       </section>

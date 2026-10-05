@@ -151,9 +151,9 @@ export const SERVICES: Service[] = [
     id: "ppf",
     number: "03",
     name: "Paint Protection Film",
-    tagline: "Self-healing · Clear · Chip-resistant",
+    tagline: "Self-healing · Clear or colored · Chip-resistant",
     description:
-      "A clear, self-healing urethane film applied over your paint to help guard it against rock chips, road rash and bug etching. Light swirls in the film can heal with heat.",
+      "A self-healing urethane film applied over your paint to help guard it against rock chips, road rash and bug etching, in clear or in color. Light swirls in the film can heal with heat.",
     notice:
       "Protection isn't guaranteed. Film helps resist chips and light scratches, but a hard enough impact, a deep scratch or heavy road debris can still damage the film or the paint under it. The rock demo is an illustration, not a promise of results.",
     quoteKey: "ppf",

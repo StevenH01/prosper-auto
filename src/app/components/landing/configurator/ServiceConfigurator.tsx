@@ -4,7 +4,7 @@ import { Poppins } from "next/font/google";
 import type { ServiceKey } from "../../CustomModal";
 import { Stage } from "./Stage";
 import { OVERVIEW, SERVICES, type ServiceId, type Shot, type TintLevels, type ViewId } from "./services";
-import { STOCK_COLOR, WRAP_COLORS, paintFor, type WrapFinish } from "./wraps";
+import { DEFAULT_PPF_COLOR, PPF_COLORS, STOCK_COLOR, WRAP_COLORS, filmPaintFor, paintFor, type WrapColor, type WrapFinish } from "./wraps";
 
 const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 
@@ -16,6 +16,48 @@ const chip = (active: boolean) =>
     active ? "border-red-600 bg-red-600 text-white" : "border-[#333] text-zinc-400 hover:border-zinc-500 hover:text-white"
   }`;
 
+/** A row of round color swatches, shared by the wrap and colored-film pickers. */
+function Swatches({
+  label,
+  name,
+  colors,
+  value,
+  onChange,
+  note,
+}: {
+  label: string;
+  name: string;
+  colors: WrapColor[];
+  value: string;
+  onChange: (id: string) => void;
+  note: string;
+}) {
+  return (
+    <div>
+      <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+        {label} <span className="ml-1 normal-case tracking-normal text-zinc-300">{name}</span>
+      </p>
+      <div role="group" aria-label={`${label} options`} className="flex flex-wrap gap-2.5">
+        {colors.map((c) => (
+          <button
+            key={c.id}
+            type="button"
+            aria-pressed={c.id === value}
+            aria-label={c.name}
+            title={c.name}
+            onClick={() => onChange(c.id)}
+            className={`h-8 w-8 rounded-full border transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
+              c.id === value ? "scale-110 border-white ring-2 ring-red-600 ring-offset-2 ring-offset-[#0b0b0b]" : "border-white/25 hover:scale-110"
+            }`}
+            style={{ background: c.id === STOCK_COLOR ? "linear-gradient(135deg, #4a5160 0%, #0b0c0f 100%)" : c.hex }}
+          />
+        ))}
+      </div>
+      <p className="mt-2.5 text-xs leading-relaxed text-zinc-400">{note}</p>
+    </div>
+  );
+}
+
 /**
  * Interactive hero garage: pick a service and the camera moves to the part of
  * the car it protects, with an animated demo and a short explanation.
@@ -25,6 +67,8 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
   const [optionIds, setOptionIds] = useState(defaultOptionIds);
   const [tint, setTint] = useState<TintLevels>(NO_TINT);
   const [wrapColor, setWrapColor] = useState(STOCK_COLOR);
+  const [ppfColored, setPpfColored] = useState(false);
+  const [ppfColor, setPpfColor] = useState(DEFAULT_PPF_COLOR);
   const [manualView, setManualView] = useState<ViewId | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -38,6 +82,11 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
   const wrapped = wrap.id !== STOCK_COLOR;
   const paint = useMemo(() => paintFor(wrapColor, wrapFinish), [wrapColor, wrapFinish]);
   const finishLabel = wrapFinish[0].toUpperCase() + wrapFinish.slice(1);
+
+  // Colored PPF recolors only the panels the chosen coverage reaches.
+  const ppfCoverage = optionIds.ppf;
+  const ppfColorInfo = PPF_COLORS.find((c) => c.id === ppfColor) ?? PPF_COLORS[0];
+  const ppfFilm = useMemo(() => (ppfColored ? filmPaintFor(ppfColor) : null), [ppfColored, ppfColor]);
 
   // Film goes on the first time a pane is shown, once the camera has arrived.
   useEffect(() => {
@@ -61,7 +110,7 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
   }, [manualView, option]);
   const shotKey = manualView ? `cam-${manualView}` : option && service ? `${service.id}:${option.id}` : "idle";
 
-  const atDefault = !serviceId && !manualView && !wrapped && !tint.windshield && !tint.front && !tint.rear;
+  const atDefault = !serviceId && !manualView && !wrapped && !ppfColored && !tint.windshield && !tint.front && !tint.rear;
   // Back to the stock car: side view, no service picked, factory glass, original paint.
   const reset = () => {
     setServiceId(null);
@@ -69,11 +118,18 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
     setOptionIds(defaultOptionIds());
     setTint(NO_TINT);
     setWrapColor(STOCK_COLOR);
+    setPpfColored(false);
+    setPpfColor(DEFAULT_PPF_COLOR);
   };
 
   // What the visitor previewed, so the quote form can pre-fill it for the shop.
   const quoteNotes = (id: ServiceId): string => {
     if (id === "wrap" && wrapped) return `Vinyl wrap: ${wrap.name}, ${wrapFinish} finish.`;
+    if (id === "ppf") {
+      const coverage = SERVICES.find((s) => s.id === "ppf")?.options.find((o) => o.id === ppfCoverage)?.label;
+      if (ppfColored) return `PPF: ${coverage} coverage, colored film (${ppfColorInfo.name}).`;
+      return ppfCoverage !== defaultOptionIds().ppf ? `PPF: ${coverage} coverage, clear film.` : "";
+    }
     if (id === "tint") {
       const parts = [
         ["windshield", tint.windshield],
@@ -126,6 +182,7 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
                 : undefined
           }
           paint={paint}
+          colorFilm={ppfFilm ? { coverage: ppfCoverage, paint: ppfFilm } : null}
           onHotspot={selectService}
           onView={setManualView}
           onReset={reset}
@@ -191,30 +248,14 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
 
             <div className="flex flex-col gap-5">
               {service.id === "wrap" && (
-                <div>
-                  <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
-                    Color <span className="ml-1 normal-case tracking-normal text-zinc-300">{wrap.name}</span>
-                  </p>
-                  <div role="group" aria-label="Wrap color" className="flex flex-wrap gap-2.5">
-                    {WRAP_COLORS.map((c) => (
-                      <button
-                        key={c.id}
-                        type="button"
-                        aria-pressed={c.id === wrapColor}
-                        aria-label={c.name}
-                        title={c.name}
-                        onClick={() => setWrapColor(c.id)}
-                        className={`h-8 w-8 rounded-full border transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500 ${
-                          c.id === wrapColor
-                            ? "scale-110 border-white ring-2 ring-red-600 ring-offset-2 ring-offset-[#0b0b0b]"
-                            : "border-white/25 hover:scale-110"
-                        }`}
-                        style={{ background: c.id === STOCK_COLOR ? "linear-gradient(135deg, #4a5160 0%, #0b0c0f 100%)" : c.hex }}
-                      />
-                    ))}
-                  </div>
-                  <p className="mt-2.5 text-xs leading-relaxed text-zinc-400">These are sample colors, not our only options. Real vinyl can look different in person and in different light. Ask us about the full range of colors and finishes.</p>
-                </div>
+                <Swatches
+                  label="Color"
+                  name={wrap.name}
+                  colors={WRAP_COLORS}
+                  value={wrapColor}
+                  onChange={setWrapColor}
+                  note="These are sample colors, not our only options. Real vinyl can look different in person and in different light. Ask us about the full range of colors and finishes."
+                />
               )}
 
               {service.options.length > 1 && !(service.id === "wrap" && !wrapped) && (
@@ -233,6 +274,36 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
               <p className="border-l-2 border-red-600 pl-4 text-sm leading-relaxed text-zinc-300">
                 {service.id === "wrap" && !wrapped ? "You're looking at the car's original paint. Pick a color above to preview a wrap." : option.blurb}
               </p>
+
+              {service.id === "ppf" && (
+                <>
+                  <div>
+                    <p className="mb-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">Film</p>
+                    <div className="flex flex-wrap gap-2">
+                      {(
+                        [
+                          ["Clear", false],
+                          ["Colored", true],
+                        ] as const
+                      ).map(([label, colored]) => (
+                        <button key={label} type="button" aria-pressed={ppfColored === colored} onClick={() => setPpfColored(colored)} className={chip(ppfColored === colored)}>
+                          <span className="inline-block skew-x-12">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {ppfColored && (
+                    <Swatches
+                      label="Color"
+                      name={ppfColorInfo.name}
+                      colors={PPF_COLORS}
+                      value={ppfColor}
+                      onChange={setPpfColor}
+                      note="These are sample colors, not our only options. Colored film can look different in person and in different light. Ask us about the full range of colors and finishes."
+                    />
+                  )}
+                </>
+              )}
 
               {zone && option.shades && (
                 <div>

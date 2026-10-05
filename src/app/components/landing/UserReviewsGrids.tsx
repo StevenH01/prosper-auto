@@ -7,59 +7,60 @@ const poppins = Poppins({ weight: "800", subsets: ["latin"] });
 type Review = {
   firstName: string;
   lastName: string;
-  car: string;
+  /** The car that was worked on. Leave out when the review doesn't say. */
+  car?: string;
   review: string;
-  service: string;
+  /** Leave out when the review doesn't say what was done. */
+  service?: string;
 };
 
+// Google reviews, shown word for word. Longest and most detailed first.
 const reviews: Review[] = [
   {
-    firstName: "Steven",
-    lastName: "Mai",
-    car: "Honda Accord",
+    firstName: "Araceli",
+    lastName: "Cortez",
     review:
-      "Prosper auto works recently removed and retinted my Honda accord. There prices are so much better than any other shop I seen and the quality of these tint is perfect. It is nice and dark on the outside but from the inside you are still able to look out. I did my research on so many other shops and I found them to be the best fit. There location is really convenient and easy to find which helped. They gave me a run through of the service before I got it done and they walked me through the whole process which I found very professional. I also scheduled an appointment to have my house windows tinted too which I didn&apos;t even know was possible. Im very pleased with this company and love supporting local small owned business from hard working people like Phillip and Austin!",
+      "Got my front 2 windows tinted 35% & I couldn't be happier with the service! I requested a quote through their website and got a call that same day with my quote. I mentioned that I was interested in proceeding with them but would like to schedule later in the month. They were accommodating and even moved my appointment last minute per my request. I ended up going with the ceramic tint & im so glad I did. They were affordable, quick and friendly. Will definitely be recommending this place to everyone I know",
     service: "Ceramic Window Tint",
   },
   {
-    firstName: "Michael",
+    firstName: "Ryan",
+    lastName: "Barnes",
+    car: "Subaru WRX",
+    review:
+      "I've come here for multiple of their services now and they kill it every time. Fair pricing, quality work, and great staff. Can't recommend enough! This time they did 2 step paint correction, ceramic coating, and windows tints, and everything couldn't be better.",
+    service: "Paint Correction, Ceramic Coating & Tint",
+  },
+  {
+    firstName: "JayxTn",
     lastName: "",
-    car: "Tesla Model Y",
+    car: "BMW M3",
     review:
-      "I was pleased with the customer service from start to finish. Philip was very polite and professional. He took the time to clarify who packages he had to offer and what they entail. The process of receiving the quote and scheduling the appointment was quick. They also took the time to provide updates on the process. I am extremely happy with the outcome of the ceramic coating on my vehicle. I&apos;d definitely recommend if you&apos;re looking to protecting your vehicle&apos;s paint.",
-    service: "Ceramic Coating",
-  },
-  {
-    firstName: "Jesica",
-    lastName: "McNary",
-    car: "Tesla Model Y",
-    review:
-      "I recently had PPF done by prosper on my model Y Tesla and it came out so good!! I had originally had ppf before and the quality was no where near prosper. They guided me through the process and the cost and they got straight to it. Every edge turned out clean and even and it looked like there was so much detail put into it. I came back to get my windows retinted and they did it in such a timely manner and exactly how I imagined",
-    service: "Paint Protection Film",
-  },
-  {
-    firstName: "Caily",
-    lastName: "Mai",
-    car: "BMW E46 M3",
-    review:
-      "Prosper Auto Werks applied 50% windshield tint to my car and everything was perfect. They respond super fast and are very informative on their service and all the aspects that go into it. They helped guide me through the process and the cost was so reasonable. They work in a timely manner and the quality is 10/10. it&apos;s been over 6 months and there is absolutely no bubbling or creasing. They also helped me with recommendation on my wrap and the when i should get it replaced. There prices are so reasonable and I have recommend them to countless people. Very professional and they truly do care about their clients and quality of work.",
+      "This was my 2nd Time doing business with them and they were great to work with. Came in for a window tint job for my BMW M3, asked for my old tint to be removed and to do a full tint job they said they were able to get it done and a few hours later my come was finished and they did an amazing job. My car looks so much better. No more old fading tint. I recommend anyone that is thinking about getting tints, vinyl wraps or ppfs to come check them out.",
     service: "Window Tint",
   },
   {
-    firstName: "Michelle",
-    lastName: "Thatch",
-    car: "Tesla Model Y",
+    firstName: "Marissa",
+    lastName: "Childers",
+    car: "Acura",
     review:
-      "Prosper Auto Werks did a fantastic job with the Trenton Blue wrap on my Model Y. They were excellent at communicating every step of the process, making sure I understood all the details before moving forward. The wrap turned out beautifully, with a flawless finish that really stands out. They completed the work efficiently without sacrificing quality, and I couldn&apos;t be happier with the results. Highly recommend them for anyone looking for top-notch service and a quality wrap!",
-    service: "Full Wrap",
+      "Shoutout to Philip for tinting my windows!! (20% on the two front windows — 5% on the two back passengers, sunroof, and rear window). He did a great job and I'm very happy with the results.",
+    service: "Window Tint",
   },
   {
-    firstName: "Christian",
-    lastName: "Estadilla",
-    car: "Mercedes GLC",
+    firstName: "Romell",
+    lastName: "Banagan",
+    car: "Tesla Model S",
     review:
-      "Professional team. Great job and would be coming back to have my other GLC 300 ceramic tinted.",
-    service: "Ceramic Tint",
+      "Superb job, fantastic quality, and an awesome staff that will take great care of you! Thank you Phillip, Austin, and the team for taking good care of my Model S and making it look so good!",
+  },
+  {
+    firstName: "Angelina",
+    lastName: "de la Rosa",
+    car: "Lexus IS",
+    review:
+      "Great service and super fast! Had my sunroof done at 5% and rear reflector delete. Excellent work and highly recommended! Thank you, Phillip!",
+    service: "Window Tint",
   },
 ];
 
@@ -107,14 +108,16 @@ export const UserReviewsGrid: React.FC = () => {
             )}
 
             <div className="mt-auto pt-4 border-t border-[#242424]">
-              <div className="flex items-center justify-between">
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                 <div>
                   <p className={`${poppins.className} text-white text-sm uppercase`}>
                     {review.firstName} {review.lastName}
                   </p>
-                  <p className="text-zinc-500 text-xs mt-0.5">{review.car}</p>
+                  {review.car && <p className="text-zinc-500 text-xs mt-0.5">{review.car}</p>}
                 </div>
-                <span className="text-[10px] text-red-500/70 uppercase tracking-widest font-bold text-right">{review.service}</span>
+                {review.service && (
+                  <span className="text-[10px] text-red-500/70 uppercase tracking-widest font-bold text-right">{review.service}</span>
+                )}
               </div>
             </div>
           </div>

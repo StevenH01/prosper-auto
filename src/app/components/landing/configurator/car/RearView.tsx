@@ -1,4 +1,5 @@
 import { Poppins } from "next/font/google";
+import styles from "../configurator.module.css";
 import type { TintLevels, TintZone } from "../services";
 import { MIRROR, REAR } from "./geometry";
 import { Pane, Sheen, Tyre } from "./parts";
@@ -26,7 +27,19 @@ function Half({ side, shine }: { side: "r" | "l"; shine: number }) {
 }
 
 /** Rear view from slightly above, so the rear window sits clear of the wing. */
-export function RearView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: TintZone | null; shine?: number }) {
+export function RearView({
+  tint,
+  focus,
+  shine = 1,
+  filmCoverage = null,
+}: {
+  tint: TintLevels;
+  focus: TintZone | null;
+  shine?: number;
+  /** Where colored film reaches (a PPF coverage id), or null for none. Only "full-body" reaches the rear. */
+  filmCoverage?: string | null;
+}) {
+  const film = filmCoverage === "full-body";
   return (
     <g>
       <clipPath id="pc-rear-body">
@@ -39,6 +52,7 @@ export function RearView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: 
       </g>
 
       <path d={REAR.body} fill="url(#pc-paint-rear)" />
+      {film && <path d={REAR.body} fill="url(#pc-ppfc-rear)" className={styles.fadeIn} />}
       <g clipPath="url(#pc-rear-body)" pointerEvents="none">
         <g style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         <path d="M 440 596 C 520 560 850 560 930 596" fill="none" stroke="#eef3ff" strokeOpacity={0.14} strokeWidth={4} />
@@ -96,7 +110,7 @@ export function RearView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: 
       <Half side="l" shine={shine} />
 
       {/* Wing sits in front of the engine lid from this angle */}
-      <path d={REAR.wingPlane} fill="url(#pc-paint-rear)" stroke="#05050a" strokeWidth={1.3} strokeLinejoin="round" />
+      <path d={REAR.wingPlane} fill={film ? "url(#pc-ppfc-rear)" : "url(#pc-paint-rear)"} stroke="#05050a" strokeWidth={1.3} strokeLinejoin="round" />
       <path d="M 446 466 C 560 461 810 461 924 466" fill="none" stroke="#e8eefc" strokeOpacity={0.55} strokeWidth={2} strokeLinecap="round" />
       <path d="M 440 486 C 560 482 810 482 930 486" fill="none" stroke="#000" strokeWidth={2} />
       <path d={REAR.wingEndplateR} fill="url(#pc-carbon)" stroke="#6b6e78" strokeWidth={1} />
