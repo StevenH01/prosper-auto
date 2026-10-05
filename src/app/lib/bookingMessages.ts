@@ -6,7 +6,7 @@ const SERVICES: Record<string, { label: string; short: string }> = {
   windowTint: { label: "Window Tint", short: "WT" },
   ceramicCoating: { label: "Ceramic Coating", short: "CC" },
   paintCorrection: { label: "Paint Correction", short: "PC" },
-  vinylWrap: { label: "Vinyl Wrap", short: "VVW" },
+  vinylWrap: { label: "Vinyl Wrap", short: "VLW" },
 };
 
 // Collapse newlines so single-line fields can't inject extra lines
