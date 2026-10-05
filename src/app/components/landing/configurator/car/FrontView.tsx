@@ -6,7 +6,7 @@ import { Pane, Sheen, Tyre } from "./parts";
 const groove = { fill: "none", stroke: "#000", strokeOpacity: 0.75, strokeWidth: 1.6, strokeLinecap: "round" } as const;
 
 /** Right-hand details; drawn twice, the second time mirrored. */
-function Half({ tint, focus, side, shine }: { tint: TintLevels; focus: TintZone | null; side: "r" | "l"; shine: number }) {
+function Half({ tint, focus, side, shine, film }: { tint: TintLevels; focus: TintZone | null; side: "r" | "l"; shine: number; film: boolean }) {
   const hl = FRONT.headlightR;
   return (
     <g transform={side === "l" ? MIRROR : undefined}>
@@ -60,14 +60,27 @@ function Half({ tint, focus, side, shine }: { tint: TintLevels; focus: TintZone 
 
       {/* Mirror: body-colour cap on a stalk */}
       <path d={FRONT.mirrorStalkR} fill="#17181c" stroke="#3a3d46" strokeWidth={0.8} />
-      <path d={FRONT.mirrorCapR} fill="url(#pc-paint)" stroke="#05050a" strokeWidth={1.2} />
+      <path d={FRONT.mirrorCapR} fill={film ? "url(#pc-ppfc-small)" : "url(#pc-paint)"} stroke="#05050a" strokeWidth={1.2} />
       <path d="M 902 489 C 916 484 944 484 960 491" fill="none" stroke="#e8eefc" strokeOpacity={0.55} strokeWidth={1.8} strokeLinecap="round" />
     </g>
   );
 }
 
 /** Head-on view from slightly above, so the hood and windshield read clearly. */
-export function FrontView({ tint, focus, hoodSelected, shine = 1 }: { tint: TintLevels; focus: TintZone | null; hoodSelected: boolean; shine?: number }) {
+export function FrontView({
+  tint,
+  focus,
+  hoodSelected,
+  shine = 1,
+  filmCoverage = null,
+}: {
+  tint: TintLevels;
+  focus: TintZone | null;
+  hoodSelected: boolean;
+  shine?: number;
+  /** Where colored film reaches (a PPF coverage id), or null for none. */
+  filmCoverage?: string | null;
+}) {
   return (
     <g>
       <clipPath id="pc-front-body">
@@ -85,6 +98,16 @@ export function FrontView({ tint, focus, hoodSelected, shine = 1 }: { tint: Tint
       </g>
 
       <path d={FRONT.body} fill="url(#pc-paint-front)" />
+      {filmCoverage && (
+        <g clipPath="url(#pc-front-body)" className={styles.fadeIn}>
+          <clipPath id="pc-ppfc-front-cover">
+            <path d={FRONT.ppf[filmCoverage]} />
+          </clipPath>
+          <g clipPath="url(#pc-ppfc-front-cover)">
+            <path d={FRONT.body} fill="url(#pc-ppfc-front)" />
+          </g>
+        </g>
+      )}
       <g clipPath="url(#pc-front-body)" fill="none" pointerEvents="none">
         <g style={{ opacity: shine, transition: "opacity 0.7s ease" }}>
         {/* Softbox reflection across the hood, a hot spot on the crown, and a bright lip along the nose */}
@@ -126,8 +149,8 @@ export function FrontView({ tint, focus, hoodSelected, shine = 1 }: { tint: Tint
       <path d="M 586 687 L 784 687" stroke="#000" strokeOpacity={0.6} strokeWidth={2.6} />
       <path d={FRONT.lip} fill="url(#pc-carbon)" stroke="#1c1d21" strokeWidth={1} />
 
-      <Half tint={tint} focus={focus} side="r" shine={shine} />
-      <Half tint={tint} focus={focus} side="l" shine={shine} />
+      <Half tint={tint} focus={focus} side="r" shine={shine} film={!!filmCoverage} />
+      <Half tint={tint} focus={focus} side="l" shine={shine} film={!!filmCoverage} />
 
       <path d={FRONT.body} fill="none" stroke="#9aa3b5" strokeOpacity={0.3} strokeWidth={1.1} strokeLinejoin="round" />
       <path d={FRONT.topLine} fill="none" stroke="url(#pc-rim-light)" strokeWidth={2.2} strokeLinecap="round" />

@@ -152,6 +152,12 @@ export const FRONT = {
   tyreR: { x: 876, y: 690, w: 76, h: 88 },
   /** Centre of the hood, where the paint-correction loupe looks. */
   hoodSpot: [685, 540] as Point,
+  /** Where colored film shows for each PPF coverage: the nose only, the whole front end, or everything. */
+  ppf: {
+    partial: "M 0 556 L 1400 556 L 1400 800 L 0 800 Z",
+    "full-front": "M 0 488 L 1400 488 L 1400 800 L 0 800 Z",
+    "full-body": "M 0 380 L 1400 380 L 1400 800 L 0 800 Z",
+  } as Record<string, string>,
 };
 
 /* ------------------------------------------------------------------ rear */

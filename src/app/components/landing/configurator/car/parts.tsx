@@ -42,7 +42,7 @@ const Paint = ({ id, y1, y2, stops }: { id: string; y1: number; y2: number; stop
 );
 
 /** Gradients, patterns and masks shared by every view; rendered once in the stage's <defs>. */
-export const CarDefs = ({ paint = ORIGINAL_PAINT }: { paint?: PaintSpec }) => (
+export const CarDefs = ({ paint = ORIGINAL_PAINT, film = null }: { paint?: PaintSpec; film?: PaintSpec | null }) => (
   <>
     <Paint id="pc-paint-side" y1={395} y2={752} stops={paint.side} />
     <Paint id="pc-paint-front" y1={398} y2={754} stops={paint.front} />
@@ -51,6 +51,18 @@ export const CarDefs = ({ paint = ORIGINAL_PAINT }: { paint?: PaintSpec }) => (
     <linearGradient id="pc-paint" x1="0" y1="0" x2="0" y2="1">
       <Stops stops={paint.small} />
     </linearGradient>
+
+    {/* Colored paint protection film, drawn over the paint where the coverage reaches */}
+    {film && (
+      <>
+        <Paint id="pc-ppfc-side" y1={395} y2={752} stops={film.side} />
+        <Paint id="pc-ppfc-front" y1={398} y2={754} stops={film.front} />
+        <Paint id="pc-ppfc-rear" y1={398} y2={752} stops={film.rear} />
+        <linearGradient id="pc-ppfc-small" x1="0" y1="0" x2="0" y2="1">
+          <Stops stops={film.small} />
+        </linearGradient>
+      </>
+    )}
 
     <linearGradient id="pc-glass" x1="0" y1="0" x2="0.2" y2="1">
       <stop offset="0" stopColor="#b7c8da" />

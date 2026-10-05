@@ -103,7 +103,7 @@ function RockStrike({ running }: { running: boolean }) {
 }
 
 /** Film coverage on the side view, its visible edge, and the rock strike. */
-export function PpfDemo({ coverage, running }: { coverage: string; running: boolean }) {
+export function PpfDemo({ coverage, running, colored = false }: { coverage: string; running: boolean; colored?: boolean }) {
   const edge = SIDE.ppfEdge[coverage];
   return (
     <g>
@@ -113,7 +113,7 @@ export function PpfDemo({ coverage, running }: { coverage: string; running: bool
       <g key={coverage} className={styles.filmIn}>
         <g clipPath="url(#pc-side-body)">
           <g clipPath="url(#pc-ppf-cover)">
-            <rect x={0} y={380} width={1600} height={420} fill="url(#pc-film)" />
+            {!colored && <rect x={0} y={380} width={1600} height={420} fill="url(#pc-film)" />}
             <path
               d="M -120 380 L 20 380 L -100 800 L -240 800 Z"
               fill="url(#pc-sweep)"
@@ -122,7 +122,7 @@ export function PpfDemo({ coverage, running }: { coverage: string; running: bool
             />
           </g>
         </g>
-        <path d={SIDE.mirrorCap} fill="url(#pc-film)" stroke="#e0f2fe" strokeOpacity={0.6} strokeWidth={1} />
+        {!colored && <path d={SIDE.mirrorCap} fill="url(#pc-film)" stroke="#e0f2fe" strokeOpacity={0.6} strokeWidth={1} />}
         {edge && (
           <g clipPath="url(#pc-side-body)">
             <path d={edge} fill="none" stroke="#fca5a5" strokeWidth={1.6} strokeDasharray="6 5" className={styles.march} />

@@ -87,9 +87,11 @@ export type StageProps = {
   canReset: boolean;
   /** Body paint, so a vinyl wrap can recolor the car. */
   paint: PaintSpec;
+  /** Colored paint protection film, if chosen: how far it reaches and its color. */
+  colorFilm: { coverage: string; paint: PaintSpec } | null;
 };
 
-export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView, onReset, canReset, paint }: StageProps) {
+export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, calloutDetail, onHotspot, onView, onReset, canReset, paint, colorFilm }: StageProps) {
   const box = useRef<HTMLDivElement>(null);
   const [size, setSize] = useState<{ w: number; h: number } | null>(null);
   const [animateCamera, setAnimateCamera] = useState(false);
@@ -181,7 +183,7 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
 
       <svg viewBox={`0 0 ${W} ${H}`} className="absolute inset-0 h-full w-full" role="img" aria-label={description}>
         <defs>
-          <CarDefs paint={paint} />
+          <CarDefs paint={paint} film={colorFilm?.paint ?? null} />
         </defs>
         <g
           style={{
@@ -192,22 +194,22 @@ export function Stage({ shots, shotKey, service, optionId, tint, tintFocus, call
           <g style={viewStyle(view === "side", reduced)}>
             <Floor carId="pc-car-side" width={1300} cx={690} contacts={[[346, 230], [1062, 210]]} />
             <g id="pc-car-side">
-              <SideView tint={tint} focus={tintFocus} shine={paint.shine} />
+              <SideView tint={tint} focus={tintFocus} shine={paint.shine} filmCoverage={colorFilm?.coverage ?? null} />
             </g>
             <SideLightSweep gloss={serviceId === "ceramic" && optionId === "coated"} />
-            {serviceId === "ppf" && optionId && <PpfDemo coverage={optionId} running={running && view === "side"} />}
+            {serviceId === "ppf" && optionId && <PpfDemo coverage={optionId} running={running && view === "side"} colored={!!colorFilm} />}
             {serviceId === "ceramic" && <CeramicDemo coated={optionId === "coated"} />}
           </g>
           <g style={viewStyle(view === "front", reduced)}>
             <Floor carId="pc-car-front" width={620} cx={CX} contacts={[[914, 110], [456, 110]]} />
             <g id="pc-car-front">
-              <FrontView tint={tint} focus={tintFocus} hoodSelected={serviceId === "correction"} shine={paint.shine} />
+              <FrontView tint={tint} focus={tintFocus} hoodSelected={serviceId === "correction"} shine={paint.shine} filmCoverage={colorFilm?.coverage ?? null} />
             </g>
           </g>
           <g style={viewStyle(view === "rear", reduced)}>
             <Floor carId="pc-car-rear" width={620} cx={CX} contacts={[[904, 130], [466, 130]]} />
             <g id="pc-car-rear">
-              <RearView tint={tint} focus={tintFocus} shine={paint.shine} />
+              <RearView tint={tint} focus={tintFocus} shine={paint.shine} filmCoverage={colorFilm?.coverage ?? null} />
             </g>
           </g>
         </g>

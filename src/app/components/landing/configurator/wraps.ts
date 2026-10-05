@@ -33,3 +33,13 @@ export const paintFor = (colorId: string, finish: WrapFinish): PaintSpec => {
   if (!color || color.id === STOCK_COLOR) return ORIGINAL_PAINT;
   return wrapPaint(color.hex, FINISH[finish].contrast, FINISH[finish].shine);
 };
+
+/** Colors offered for colored paint protection film. It starts as the wrap palette (minus "original paint"); edit it separately. */
+export const PPF_COLORS: WrapColor[] = WRAP_COLORS.filter((c) => c.id !== STOCK_COLOR);
+export const DEFAULT_PPF_COLOR = "blue";
+
+/** Colored film is shown as a gloss finish. */
+export const filmPaintFor = (colorId: string): PaintSpec | null => {
+  const color = PPF_COLORS.find((c) => c.id === colorId);
+  return color ? wrapPaint(color.hex, 1, 1) : null;
+};

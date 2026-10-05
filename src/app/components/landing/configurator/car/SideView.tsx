@@ -40,7 +40,18 @@ export function SideLightSweep({ gloss }: { gloss: boolean }) {
 }
 
 /** Side profile, facing right. */
-export function SideView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: TintZone | null; shine?: number }) {
+export function SideView({
+  tint,
+  focus,
+  shine = 1,
+  filmCoverage = null,
+}: {
+  tint: TintLevels;
+  focus: TintZone | null;
+  shine?: number;
+  /** Where colored film reaches (a PPF coverage id), or null for none. */
+  filmCoverage?: string | null;
+}) {
   return (
     <g>
       <clipPath id="pc-side-body">
@@ -61,6 +72,16 @@ export function SideView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: 
 
       {/* Paint */}
       <path d={SIDE.body} fill="url(#pc-paint-side)" />
+      {filmCoverage && (
+        <g clipPath="url(#pc-side-body)" className={styles.fadeIn}>
+          <clipPath id="pc-ppfc-side-cover">
+            <path d={SIDE.ppf[filmCoverage]} />
+          </clipPath>
+          <g clipPath="url(#pc-ppfc-side-cover)">
+            <path d={SIDE.body} fill="url(#pc-ppfc-side)" />
+          </g>
+        </g>
+      )}
       <g clipPath="url(#pc-side-body)" pointerEvents="none">
         {[ARCH.rear, ARCH.front].map((a) => (
           <circle key={a.cx} cx={a.cx} cy={a.cy} r={a.r + 36} fill="url(#pc-arch-ao)" />
@@ -102,7 +123,7 @@ export function SideView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: 
 
       {/* Mirror: body-colour cap on a black sail */}
       <path d={SIDE.mirrorSail} fill="#08080a" stroke="#2b2d33" strokeWidth={1} />
-      <path d={SIDE.mirrorCap} fill="url(#pc-paint)" stroke="#05050a" strokeWidth={1.2} />
+      <path d={SIDE.mirrorCap} fill={filmCoverage ? "url(#pc-ppfc-small)" : "url(#pc-paint)"} stroke="#05050a" strokeWidth={1.2} />
       <path d="M 790 503 C 806 498 826 501 838 510" fill="none" stroke="#e8eefc" strokeOpacity={0.6} strokeWidth={2} strokeLinecap="round" />
 
       {/* Panel gaps and trim */}
@@ -173,7 +194,7 @@ export function SideView({ tint, focus, shine = 1 }: { tint: TintLevels; focus: 
 
       {/* Wing: swan-neck upright in carbon, painted endplate */}
       <path d={SIDE.wingUpright} fill="url(#pc-carbon)" stroke="#52545d" strokeWidth={1} />
-      <path d={SIDE.wingEndplate} fill="url(#pc-paint-side)" stroke="#05050a" strokeWidth={1.4} strokeLinejoin="round" />
+      <path d={SIDE.wingEndplate} fill={filmCoverage === "full-body" ? "url(#pc-ppfc-side)" : "url(#pc-paint-side)"} stroke="#05050a" strokeWidth={1.4} strokeLinejoin="round" />
       <path d="M 78 416 L 204 413 C 226 414 242 423 246 432" fill="none" stroke="#e8eefc" strokeOpacity={0.55} strokeWidth={2.2} strokeLinecap="round" />
       <path d={SIDE.wingPlane} fill="none" stroke="#000" strokeOpacity={0.7} strokeWidth={1.2} />
 
