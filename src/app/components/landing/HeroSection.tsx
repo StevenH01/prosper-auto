@@ -10,7 +10,7 @@ export const HeroSection = () => {
   const [quote, setQuote] = useState<{ services: ServiceKey[]; notes?: string } | null>(null);
 
   return (
-    <section className="relative overflow-hidden bg-black pb-16 pt-28 sm:pb-20 sm:pt-36">
+    <section className="relative overflow-clip bg-black pb-16 pt-28 sm:pb-20 sm:pt-36">
       {/* Red accent line at top */}
       <div className="absolute left-0 right-0 top-0 z-20 h-0.5 bg-red-600" />
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_40%_at_75%_0%,rgba(220,38,38,0.12),transparent_70%)]" />

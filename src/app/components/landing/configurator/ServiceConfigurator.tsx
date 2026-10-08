@@ -72,6 +72,21 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
   const [manualView, setManualView] = useState<ViewId | null>(null);
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
 
+  // On phones the car is pinned just under the navbar, so it stays in view while the visitor works the
+  // controls below it. Track the navbar's height (it grows when the mobile menu opens) to sit right beneath it.
+  // The offset is a CSS variable used only for the sticky `top`: above the sm breakpoint the box is `relative`,
+  // where a plain `top` would push the whole car down over the tabs.
+  const [navHeight, setNavHeight] = useState(0);
+  useEffect(() => {
+    const nav = document.querySelector("nav");
+    if (!nav) return;
+    const update = () => setNavHeight(Math.round(nav.getBoundingClientRect().height));
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(nav);
+    return () => ro.disconnect();
+  }, []);
+
   const service = SERVICES.find((s) => s.id === serviceId) ?? null;
   const option = service?.options.find((o) => o.id === optionIds[service.id]) ?? null;
   const zone = service?.id === "tint" ? option?.zone ?? null : null;
@@ -164,7 +179,11 @@ export function ServiceConfigurator({ onQuote }: { onQuote: (key: ServiceKey, no
 
   return (
     <div className="border border-[#242424] bg-[#0b0b0b]">
-      <div className="relative aspect-[4/3] sm:aspect-[16/9] lg:aspect-auto lg:h-[480px]">
+      {/* Pinned on phones; it sticks only while the visitor is in this section, then scrolls away with it. */}
+      <div
+        className="sticky top-[var(--nav-h)] z-20 aspect-[3/2] shadow-[0_12px_20px_-12px_rgba(0,0,0,0.9)] sm:relative sm:top-auto sm:z-auto sm:aspect-[16/9] sm:shadow-none lg:aspect-auto lg:h-[480px]"
+        style={{ "--nav-h": `${navHeight}px` } as CSSProperties}
+      >
         <Stage
           shots={shots}
           shotKey={shotKey}
