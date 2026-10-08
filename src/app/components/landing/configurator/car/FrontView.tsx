@@ -136,13 +136,6 @@ export function FrontView({
       <path d={FRONT.hoodVent} fill="#040405" stroke="#2b2d33" strokeWidth={0.8} />
       <path d="M 640 583 L 730 583" stroke="#2b2d33" strokeWidth={1} />
 
-      {/* Crest on the lid */}
-      <g transform="translate(685 601)">
-        <path d="M -8 -9 H 8 V 2 C 8 7 3 10 0 11 C -3 10 -8 7 -8 2 Z" fill="#c9a24a" stroke="#1a1204" strokeWidth={0.9} />
-        <path d="M 0 -9 V 11 M -8 0 H 8" stroke="#1a1204" strokeWidth={0.7} />
-        <path d="M -8 -9 H 0 V 0 H -8 Z M 0 0 H 8 V 2 C 8 7 3 10 0 11 Z" fill="#7f1d1d" opacity={0.85} />
-      </g>
-
       {/* Centre intake: mesh with a carbon splitter */}
       <path d={FRONT.centerIntake} fill="url(#pc-mesh)" stroke="#52545d" strokeWidth={1} />
       <path d={FRONT.centerIntake} fill="none" stroke="#000" strokeOpacity={0.6} strokeWidth={2.4} />

@@ -86,8 +86,8 @@ export function RearView({
       <path d="M 430 596 C 540 604 830 604 940 596" fill="none" stroke="#000" strokeOpacity={0.7} strokeWidth={1.4} />
       <path d="M 590 572 L 780 572" stroke="#7f1d1d" strokeWidth={4} strokeLinecap="round" />
       <path d="M 592 571 L 778 571" stroke="#fecaca" strokeOpacity={0.8} strokeWidth={1.2} strokeLinecap="round" />
-      <text x={685} y={592} textAnchor="middle" className={poppins.className} fontSize={11} letterSpacing={7} fill="#d4d6de" fillOpacity={0.9}>
-        PORSCHE
+      <text x={685} y={593} textAnchor="middle" className={poppins.className} fontSize={13} letterSpacing={8} fill="#d4d6de" fillOpacity={0.9}>
+        3RS
       </text>
       <text x={826} y={600} textAnchor="end" className={poppins.className} fontSize={8} letterSpacing={3} fill="#d4d6de" fillOpacity={0.7}>
         GT3 RS
